@@ -85,3 +85,6 @@ export default function Header() {
     </header>
   )
 }
+
+// Named export for Header component
+export { Header }

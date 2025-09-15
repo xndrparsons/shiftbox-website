@@ -82,3 +82,6 @@ export default function Footer() {
     </footer>
   )
 }
+
+// Named export for Footer component
+export { Footer }

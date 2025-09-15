@@ -30,7 +30,6 @@ export const metadata: Metadata = {
     description:
       "Professional automotive services in Kendal, Cumbria. Quality used cars, expert servicing, and premium detailing.",
   },
-    generator: 'v0.app'
 }
 
 export default function RootLayout({

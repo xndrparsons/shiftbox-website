@@ -6,14 +6,21 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Gauge } from "lucide-react"
 
 interface Vehicle {
-  id: number
-  title: string
+  id: string
   make: string
   model: string
   year: number
-  mileage: number
   price: number
-  images: string[]
+  mileage: number | null
+  fuel_type: string | null
+  transmission: string | null
+  body_type: string | null
+  color: string | null
+  engine_size: string | null
+  doors: number | null
+  description: string | null
+  features: string[] | null
+  images: string[] | null
   status: string
 }
 
@@ -30,16 +37,19 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
     }).format(price)
   }
 
-  const formatMileage = (mileage: number) => {
+  const formatMileage = (mileage: number | null) => {
+    if (!mileage) return "N/A"
     return new Intl.NumberFormat("en-GB").format(mileage)
   }
+
+  const vehicleTitle = `${vehicle.make} ${vehicle.model}`
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative aspect-[4/3]">
         <Image
-          src={vehicle.images[0] || `/placeholder.svg?height=300&width=400&query=${vehicle.make} ${vehicle.model}`}
-          alt={`${vehicle.make} ${vehicle.model}`}
+          src={vehicle.images?.[0] || `/placeholder.svg?height=300&width=400&query=${vehicle.make} ${vehicle.model}`}
+          alt={vehicleTitle}
           fill
           className="object-cover"
         />
@@ -51,7 +61,7 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
       </div>
 
       <CardContent className="p-4">
-        <h3 className="font-semibold text-lg mb-2 text-balance">{vehicle.title}</h3>
+        <h3 className="font-semibold text-lg mb-2 text-balance">{vehicleTitle}</h3>
         <div className="text-2xl font-bold text-primary mb-3">{formatPrice(vehicle.price)}</div>
 
         <div className="flex items-center justify-between text-sm text-muted-foreground">
