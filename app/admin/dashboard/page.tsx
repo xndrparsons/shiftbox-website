@@ -3,8 +3,9 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Car, MessageSquare, Users, Plus } from "lucide-react"
+import { Car, MessageSquare, Users, Plus, Database } from "lucide-react"
 import Link from "next/link"
+import { SchemaSyncButton } from "@/components/admin/SchemaSyncButton"
 
 async function getAdminData() {
   const cookieStore = cookies()
@@ -64,9 +65,12 @@ export default async function AdminDashboard() {
               <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
               <p className="text-gray-600">Welcome back, {adminUser.name}</p>
             </div>
-            <form action="/auth/signout" method="post">
-              <Button variant="outline">Sign Out</Button>
-            </form>
+            <div className="flex items-center gap-4">
+              <SchemaSyncButton />
+              <form action="/auth/signout" method="post">
+                <Button variant="outline">Sign Out</Button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -109,7 +113,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -156,6 +160,24 @@ export default async function AdminDashboard() {
                   View Inquiries
                 </Button>
               </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                API Schema Management
+              </CardTitle>
+              <CardDescription>Sync database schema with CheckCarDetails API structure</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Test VRN: <code className="bg-muted px-1 rounded">EA65AMX</code>
+                </p>
+                <SchemaSyncButton />
+              </div>
             </CardContent>
           </Card>
         </div>

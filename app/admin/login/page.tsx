@@ -17,7 +17,6 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const supabase = createClient()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,6 +24,8 @@ export default function AdminLogin() {
     setError("")
 
     try {
+      const supabase = createClient()
+
       console.log("[v0] Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL)
       console.log("[v0] Supabase client created:", !!supabase)
       console.log("[v0] Attempting login with email:", email)
