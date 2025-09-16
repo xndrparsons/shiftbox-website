@@ -26,8 +26,17 @@ export function DataTableSelector({
   const [currentPricing, setCurrentPricing] = useState<Record<string, number>>({})
   const [pricingLoaded, setPricingLoaded] = useState(false)
 
-  const accessibleTables = ["vehicleregistration", "mot", "mileage"]
-  const pendingAccessTables = ["vehiclespecs", "vehiclevaluation"]
+  const accessibleTables = [
+    "vehicleregistration",
+    "mot",
+    "mileage",
+    "vehiclespecs",
+    "vehiclevaluation",
+    "ukvehicledata",
+    "carhistorycheck",
+    "vehicleimage",
+  ]
+  const pendingAccessTables: string[] = []
 
   useEffect(() => {
     const fetchCurrentPricing = async () => {
