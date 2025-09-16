@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Plus, X, Loader2 } from "lucide-react"
 import { createBrowserClient } from "@supabase/ssr"
 
@@ -50,6 +51,33 @@ interface VehicleData {
   drivetrain?: string
   gearbox?: string
   fuel_capacity?: number
+
+  dvla_registration_number?: string
+  dvla_tax_status?: string
+  dvla_tax_due_date?: string
+  dvla_mot_status?: string
+  dvla_mot_expiry_date?: string
+  dvla_make?: string
+  dvla_year_manufacture?: number
+  dvla_engine_capacity?: number
+  dvla_co2_emissions?: number
+  dvla_fuel_type?: string
+  dvla_colour?: string
+  dvla_euro_status?: string
+
+  exterior_paintwork_condition?: string
+  interior_condition?: string
+  engine_condition?: string
+  presence_of_rust?: boolean
+  rust_locations?: string[]
+  bodywork_damage?: string
+  mechanical_issues?: string
+  service_history_status?: string
+  previous_owners?: number
+  accident_history?: boolean
+  accident_details?: string
+  overall_condition_rating?: number
+  condition_notes?: string
 }
 
 export default function VehicleForm({
@@ -64,10 +92,15 @@ export default function VehicleForm({
   const [vehicleData, setVehicleData] = useState<VehicleData>(
     initialData || {
       features: [],
+      rust_locations: [],
       status: "available",
+      presence_of_rust: false,
+      accident_history: false,
+      overall_condition_rating: 5,
     },
   )
   const [newFeature, setNewFeature] = useState("")
+  const [newRustLocation, setNewRustLocation] = useState("")
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -94,15 +127,29 @@ export default function VehicleForm({
       const result = await response.json()
 
       if (result.success && result.data) {
-        // Merge the lookup data with existing form data
+        const dvlaData = result.data
         setVehicleData((prev) => ({
           ...prev,
-          ...result.data,
-          // Keep any manually entered data that wasn't returned by the API
-          price: prev.price || result.data.price,
-          mileage: prev.mileage || result.data.mileage,
-          description: prev.description || result.data.description,
-          image_url: prev.image_url || result.data.image_url,
+          // Map DVLA fields to our database structure
+          dvla_registration_number: dvlaData.registrationNumber,
+          dvla_tax_status: dvlaData.taxStatus,
+          dvla_tax_due_date: dvlaData.taxDueDate,
+          dvla_mot_status: dvlaData.motStatus,
+          dvla_mot_expiry_date: dvlaData.motExpiryDate,
+          dvla_make: dvlaData.make,
+          dvla_year_manufacture: dvlaData.yearOfManufacture,
+          dvla_engine_capacity: dvlaData.engineCapacity,
+          dvla_co2_emissions: dvlaData.co2Emissions,
+          dvla_fuel_type: dvlaData.fuelType,
+          dvla_colour: dvlaData.colour,
+          dvla_euro_status: dvlaData.euroStatus,
+
+          // Also populate main vehicle fields if not already set
+          make: prev.make || dvlaData.make,
+          year: prev.year || dvlaData.yearOfManufacture,
+          fuel_type: prev.fuel_type || dvlaData.fuelType?.toLowerCase(),
+          color: prev.color || dvlaData.colour,
+          co2_emissions: prev.co2_emissions || dvlaData.co2Emissions,
         }))
       } else {
         setLookupError(result.error || "Failed to lookup vehicle details")
@@ -129,6 +176,23 @@ export default function VehicleForm({
     setVehicleData((prev) => ({
       ...prev,
       features: prev.features?.filter((f) => f !== feature) || [],
+    }))
+  }
+
+  const addRustLocation = () => {
+    if (newRustLocation.trim() && !vehicleData.rust_locations?.includes(newRustLocation.trim())) {
+      setVehicleData((prev) => ({
+        ...prev,
+        rust_locations: [...(prev.rust_locations || []), newRustLocation.trim()],
+      }))
+      setNewRustLocation("")
+    }
+  }
+
+  const removeRustLocation = (location: string) => {
+    setVehicleData((prev) => ({
+      ...prev,
+      rust_locations: prev.rust_locations?.filter((l) => l !== location) || [],
     }))
   }
 
@@ -190,11 +254,46 @@ export default function VehicleForm({
             </div>
           </div>
           <p className="text-sm text-gray-600 mt-2">
-            Enter a UK registration number to automatically populate vehicle specifications. Try: BM21ABC, AU21XYZ, or
-            MB21DEF for demo data.
+            Enter a UK registration number to automatically populate vehicle specifications from DVLA records.
           </p>
         </CardContent>
       </Card>
+
+      {vehicleData.dvla_registration_number && (
+        <Card>
+          <CardHeader>
+            <CardTitle>DVLA Information</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <Label>Tax Status</Label>
+              <p className="text-sm font-medium">{vehicleData.dvla_tax_status || "N/A"}</p>
+            </div>
+            <div>
+              <Label>MOT Status</Label>
+              <p className="text-sm font-medium">{vehicleData.dvla_mot_status || "N/A"}</p>
+            </div>
+            <div>
+              <Label>MOT Expiry</Label>
+              <p className="text-sm font-medium">{vehicleData.dvla_mot_expiry_date || "N/A"}</p>
+            </div>
+            <div>
+              <Label>Engine Capacity</Label>
+              <p className="text-sm font-medium">
+                {vehicleData.dvla_engine_capacity ? `${vehicleData.dvla_engine_capacity}cc` : "N/A"}
+              </p>
+            </div>
+            <div>
+              <Label>Euro Status</Label>
+              <p className="text-sm font-medium">{vehicleData.dvla_euro_status || "N/A"}</p>
+            </div>
+            <div>
+              <Label>DVLA Colour</Label>
+              <p className="text-sm font-medium">{vehicleData.dvla_colour || "N/A"}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Basic Information */}
       <Card>
@@ -331,6 +430,234 @@ export default function VehicleForm({
               step="0.1"
               value={vehicleData.mpg_combined || ""}
               onChange={(e) => setVehicleData((prev) => ({ ...prev, mpg_combined: Number.parseFloat(e.target.value) }))}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Vehicle Condition Assessment</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="exterior_paintwork_condition">Exterior Paintwork Condition</Label>
+              <Select
+                value={vehicleData.exterior_paintwork_condition}
+                onValueChange={(value) => setVehicleData((prev) => ({ ...prev, exterior_paintwork_condition: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select condition" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="excellent">Excellent</SelectItem>
+                  <SelectItem value="very good">Very Good</SelectItem>
+                  <SelectItem value="good">Good</SelectItem>
+                  <SelectItem value="fair">Fair</SelectItem>
+                  <SelectItem value="poor">Poor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="interior_condition">Interior Condition</Label>
+              <Select
+                value={vehicleData.interior_condition}
+                onValueChange={(value) => setVehicleData((prev) => ({ ...prev, interior_condition: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select condition" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="excellent">Excellent</SelectItem>
+                  <SelectItem value="very good">Very Good</SelectItem>
+                  <SelectItem value="good">Good</SelectItem>
+                  <SelectItem value="fair">Fair</SelectItem>
+                  <SelectItem value="poor">Poor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="engine_condition">Engine Condition</Label>
+              <Select
+                value={vehicleData.engine_condition}
+                onValueChange={(value) => setVehicleData((prev) => ({ ...prev, engine_condition: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select condition" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="excellent">Excellent</SelectItem>
+                  <SelectItem value="very good">Very Good</SelectItem>
+                  <SelectItem value="good">Good</SelectItem>
+                  <SelectItem value="fair">Fair</SelectItem>
+                  <SelectItem value="poor">Poor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="service_history_status">Service History</Label>
+              <Select
+                value={vehicleData.service_history_status}
+                onValueChange={(value) => setVehicleData((prev) => ({ ...prev, service_history_status: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="full service history">Full Service History</SelectItem>
+                  <SelectItem value="partial service history">Partial Service History</SelectItem>
+                  <SelectItem value="no service history">No Service History</SelectItem>
+                  <SelectItem value="unknown">Unknown</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="previous_owners">Previous Owners</Label>
+              <Input
+                id="previous_owners"
+                type="number"
+                min="0"
+                value={vehicleData.previous_owners || ""}
+                onChange={(e) =>
+                  setVehicleData((prev) => ({ ...prev, previous_owners: Number.parseInt(e.target.value) }))
+                }
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="overall_condition_rating">Overall Condition Rating (1-5)</Label>
+              <Select
+                value={vehicleData.overall_condition_rating?.toString()}
+                onValueChange={(value) =>
+                  setVehicleData((prev) => ({ ...prev, overall_condition_rating: Number.parseInt(value) }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select rating" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 - Excellent</SelectItem>
+                  <SelectItem value="4">4 - Very Good</SelectItem>
+                  <SelectItem value="3">3 - Good</SelectItem>
+                  <SelectItem value="2">2 - Fair</SelectItem>
+                  <SelectItem value="1">1 - Poor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Rust Assessment */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="presence_of_rust"
+                checked={vehicleData.presence_of_rust}
+                onCheckedChange={(checked) =>
+                  setVehicleData((prev) => ({
+                    ...prev,
+                    presence_of_rust: checked as boolean,
+                    rust_locations: checked ? prev.rust_locations : [],
+                  }))
+                }
+              />
+              <Label htmlFor="presence_of_rust">Presence of Rust</Label>
+            </div>
+
+            {vehicleData.presence_of_rust && (
+              <div>
+                <Label>Rust Locations</Label>
+                <div className="flex gap-2 mb-3">
+                  <Input
+                    value={newRustLocation}
+                    onChange={(e) => setNewRustLocation(e.target.value)}
+                    placeholder="e.g. Rear wheel arch, Door sill"
+                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addRustLocation())}
+                  />
+                  <Button type="button" onClick={addRustLocation}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {vehicleData.rust_locations?.map((location, index) => (
+                    <Badge key={index} variant="destructive" className="flex items-center gap-1">
+                      {location}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeRustLocation(location)} />
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Accident History */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="accident_history"
+                checked={vehicleData.accident_history}
+                onCheckedChange={(checked) =>
+                  setVehicleData((prev) => ({
+                    ...prev,
+                    accident_history: checked as boolean,
+                    accident_details: checked ? prev.accident_details : "",
+                  }))
+                }
+              />
+              <Label htmlFor="accident_history">Previous Accident History</Label>
+            </div>
+
+            {vehicleData.accident_history && (
+              <div>
+                <Label htmlFor="accident_details">Accident Details</Label>
+                <Textarea
+                  id="accident_details"
+                  value={vehicleData.accident_details || ""}
+                  onChange={(e) => setVehicleData((prev) => ({ ...prev, accident_details: e.target.value }))}
+                  placeholder="Describe any previous accidents or damage..."
+                  rows={3}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Additional Condition Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="bodywork_damage">Bodywork Damage</Label>
+              <Textarea
+                id="bodywork_damage"
+                value={vehicleData.bodywork_damage || ""}
+                onChange={(e) => setVehicleData((prev) => ({ ...prev, bodywork_damage: e.target.value }))}
+                placeholder="Describe any scratches, dents, or bodywork issues..."
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="mechanical_issues">Mechanical Issues</Label>
+              <Textarea
+                id="mechanical_issues"
+                value={vehicleData.mechanical_issues || ""}
+                onChange={(e) => setVehicleData((prev) => ({ ...prev, mechanical_issues: e.target.value }))}
+                placeholder="Describe any known mechanical problems..."
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="condition_notes">Additional Condition Notes</Label>
+            <Textarea
+              id="condition_notes"
+              value={vehicleData.condition_notes || ""}
+              onChange={(e) => setVehicleData((prev) => ({ ...prev, condition_notes: e.target.value }))}
+              placeholder="Any additional notes about the vehicle's condition..."
+              rows={3}
             />
           </div>
         </CardContent>
