@@ -47,6 +47,9 @@ export function DataTableSelector({
         if (result.success && result.pricing?.tables) {
           setCurrentPricing(result.pricing.tables)
           console.log("[v0] Updated pricing loaded:", result.pricing.tables)
+          Object.entries(result.pricing.tables).forEach(([table, price]) => {
+            console.log(`[v0] Table ${table}: £${(price as number).toFixed(2)}`)
+          })
         }
       } catch (error) {
         console.error("[v0] Error fetching current pricing:", error)

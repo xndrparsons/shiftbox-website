@@ -174,9 +174,23 @@ export class CheckCarDetailsAPI {
 
       if (response.ok) {
         const data = await response.json()
-        console.log("[v0] Successfully fetched pricing data")
+        console.log("[v0] Raw pricing data from API:", data)
+
+        // Convert pricing from pence to pounds if needed
+        const processedTables: Record<string, number> = {}
+        if (data.tables) {
+          Object.entries(data.tables).forEach(([tableName, price]) => {
+            // If the API returns prices in pence (like 2 for £0.02), convert to pounds
+            const priceNumber = typeof price === "number" ? price : Number.parseFloat(price as string)
+            // Assume API returns prices in pence, so divide by 100 to get pounds
+            processedTables[tableName] = priceNumber / 100
+            console.log(`[v0] Converted ${tableName}: ${priceNumber} pence -> £${processedTables[tableName]}`)
+          })
+        }
+
+        console.log("[v0] Processed pricing data:", processedTables)
         return {
-          tables: data.tables || {},
+          tables: processedTables,
           lastUpdated: new Date().toISOString(),
         }
       } else {
