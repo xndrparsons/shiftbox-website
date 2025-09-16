@@ -331,19 +331,19 @@ export class CheckCarDetailsSchemaSync {
 
 export async function runSchemaSync(): Promise<SchemaUpdateResult> {
   console.log("[v0] Checking environment variables...")
-  console.log("[v0] CHECKCARDETAILS_API_KEY present:", !!process.env.CHECKCARDETAILS_API_KEY)
+  console.log("[v0] CHECKCARDETAILS_TEST_API_KEY present:", !!process.env.CHECKCARDETAILS_TEST_API_KEY)
   console.log(
     "[v0] All env keys:",
     Object.keys(process.env).filter((key) => key.includes("CHECKCAR")),
   )
 
-  const apiKey = process.env.CHECKCARDETAILS_API_KEY
+  const apiKey = process.env.CHECKCARDETAILS_TEST_API_KEY
   if (!apiKey) {
     console.log("[v0] No API key found in environment variables")
     return {
       success: false,
       updates: [],
-      errors: ["CHECKCARDETAILS_API_KEY environment variable not set"],
+      errors: ["CHECKCARDETAILS_TEST_API_KEY environment variable not set"],
     }
   }
 
