@@ -1,11 +1,14 @@
-import { Header } from "@/components/Header"
-import { Footer } from "@/components/Footer"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "About Shiftbox",
+  description:
+    "Your trusted automotive partner in the Lake District, providing quality cars and expert services since 2015.",
+}
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-
       <main className="pt-20">
         {/* Hero Section */}
         <section className="bg-white py-16">
@@ -112,8 +115,6 @@ export default function AboutPage() {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   )
 }

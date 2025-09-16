@@ -1,11 +1,14 @@
-import { Header } from "@/components/Header"
-import { Footer } from "@/components/Footer"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Our Portfolio",
+  description:
+    "Discover the exceptional vehicles we've sourced and the quality work we've delivered for our customers.",
+}
 
 export default function PortfolioPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-
       <main className="pt-20">
         {/* Hero Section */}
         <section className="bg-white py-16">
@@ -114,8 +117,6 @@ export default function PortfolioPage() {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   )
 }

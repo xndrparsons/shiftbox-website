@@ -1,12 +1,8 @@
-import { Header } from "@/components/Header"
-import { Footer } from "@/components/Footer"
 import Link from "next/link"
 
 export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-
       <main className="pt-20">
         {/* Hero Section */}
         <section className="bg-white py-16">
@@ -266,8 +262,6 @@ export default function ServicesPage() {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   )
 }

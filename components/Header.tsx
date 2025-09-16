@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Car, Menu, X } from "lucide-react"
 import { useState } from "react"
+import { ThemeToggle } from "@/components/ThemeToggle" // Added theme toggle import
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -40,17 +41,25 @@ export default function Header() {
             </Link>
           </nav>
 
-          {/* CTA Button */}
-          <div className="hidden md:block">
+          {/* CTA Button and Theme Toggle */}
+          <div className="hidden md:flex items-center space-x-2">
+            {" "}
+            {/* Added flex container for button and theme toggle */}
+            <ThemeToggle /> {/* Added theme toggle button */}
             <Button asChild>
               <Link href="/contact">Get a Quote</Link>
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="md:hidden flex items-center space-x-2">
+            {" "}
+            {/* Added flex container for mobile theme toggle */}
+            <ThemeToggle /> {/* Added theme toggle for mobile */}
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}

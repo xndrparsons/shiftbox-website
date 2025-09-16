@@ -1,5 +1,3 @@
-import Header from "@/components/Header"
-import Footer from "@/components/Footer"
 import VehicleCard from "@/components/VehicleCard"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -90,8 +88,6 @@ const testimonials = [
 export default function HomePage() {
   return (
     <div className="min-h-screen">
-      <Header />
-
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-primary/10 to-accent/10 py-20">
         <div className="container mx-auto px-4">
@@ -284,8 +280,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   )
 }
