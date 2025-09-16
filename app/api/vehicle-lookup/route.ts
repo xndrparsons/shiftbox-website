@@ -84,9 +84,14 @@ async function lookupVehicleFromDVLA(registration: string) {
   return await response.json()
 }
 
+console.log("[v0] Vehicle lookup API route loaded")
+
 export async function POST(request: NextRequest) {
+  console.log("[v0] Vehicle lookup API called")
+
   try {
     const { registration } = await request.json()
+    console.log("[v0] Looking up registration:", registration)
 
     if (!registration) {
       return NextResponse.json(
@@ -100,8 +105,10 @@ export async function POST(request: NextRequest) {
 
     // Clean and format registration
     const cleanReg = registration.replace(/\s+/g, "").toUpperCase()
+    console.log("[v0] Cleaned registration:", cleanReg)
 
     const dvlaApiKey = process.env.DVLA_API_KEY
+    console.log("[v0] DVLA API key configured:", !!dvlaApiKey)
 
     if (dvlaApiKey) {
       try {
@@ -167,4 +174,13 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     )
   }
+}
+
+export async function GET() {
+  console.log("[v0] Vehicle lookup API GET called")
+  return NextResponse.json({
+    message: "Vehicle lookup API is working",
+    timestamp: new Date().toISOString(),
+    dvlaConfigured: !!process.env.DVLA_API_KEY,
+  })
 }
