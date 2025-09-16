@@ -242,9 +242,9 @@ let checkCarDetailsAPI: CheckCarDetailsAPI | null = null
 
 export function getCheckCarDetailsAPI(): CheckCarDetailsAPI {
   if (!checkCarDetailsAPI) {
-    const apiKey = process.env.CHECKCARDETAILS_TEST_API_KEY
+    const apiKey = process.env.CHECKCARDETAILS_LIVE_API_KEY
     if (!apiKey) {
-      throw new Error("CHECKCARDETAILS_TEST_API_KEY environment variable not set")
+      throw new Error("CHECKCARDETAILS_LIVE_API_KEY environment variable not set")
     }
     checkCarDetailsAPI = new CheckCarDetailsAPI({ apiKey })
   }

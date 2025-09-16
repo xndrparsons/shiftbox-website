@@ -87,12 +87,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<CheckCarD
       console.error("[v0] CheckCarDetails API error:", apiError)
 
       // Check if it's an API key error
-      if (apiError instanceof Error && apiError.message.includes("API key")) {
+      if (apiError instanceof Error && apiError.message.includes("CHECKCARDETAILS_LIVE_API_KEY")) {
         return NextResponse.json(
           {
             success: false,
             error:
-              "CheckCarDetails API key not configured. Please add CHECKCARDETAILS_API_KEY to environment variables.",
+              "CheckCarDetails API key not configured. Please add CHECKCARDETAILS_LIVE_API_KEY to environment variables.",
             cost: 0,
             tablesFetched: [],
           },
@@ -134,7 +134,7 @@ export async function GET() {
     return NextResponse.json({
       message: "CheckCarDetails lookup API is working",
       timestamp: new Date().toISOString(),
-      apiConfigured: !!process.env.CHECKCARDETAILS_API_KEY,
+      apiConfigured: !!process.env.CHECKCARDETAILS_LIVE_API_KEY,
       availableTables: availableTables.map((table) => ({
         name: table.name,
         label: table.label,
