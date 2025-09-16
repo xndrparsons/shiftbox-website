@@ -172,33 +172,41 @@ export function DataTableSelector({
             const isAccessible = accessibleTables.includes(table.name)
             const isPending = pendingAccessTables.includes(table.name)
             const currentCost = getTableCost(table.name)
+            const isSelected = selectedTables.includes(table.name)
 
             return (
               <div
                 key={table.name}
                 className={`flex items-start space-x-3 p-3 rounded-lg border transition-colors ${
-                  selectedTables.includes(table.name)
+                  isSelected
                     ? "bg-primary/5 border-primary/20"
                     : "bg-background border-gray-200 dark:border-gray-700 hover:bg-muted/50"
                 } ${disabled || !isAccessible ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                onClick={() =>
-                  isAccessible && !disabled && handleTableToggle(table.name, !selectedTables.includes(table.name))
-                }
               >
                 <Checkbox
-                  id={table.name}
-                  checked={selectedTables.includes(table.name)}
-                  onCheckedChange={(checked) => handleTableToggle(table.name, !!checked)}
+                  id={`table-${table.name}`}
+                  checked={isSelected}
+                  onCheckedChange={(checked) => {
+                    if (isAccessible && !disabled) {
+                      handleTableToggle(table.name, !!checked)
+                    }
+                  }}
                   disabled={disabled || !isAccessible}
                   className="mt-1"
                 />
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between">
                     <label
-                      htmlFor={table.name}
+                      htmlFor={`table-${table.name}`}
                       className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
                         isAccessible ? "cursor-pointer" : "cursor-not-allowed"
                       }`}
+                      onClick={(e) => {
+                        if (isAccessible && !disabled) {
+                          e.preventDefault()
+                          handleTableToggle(table.name, !isSelected)
+                        }
+                      }}
                     >
                       <div className="flex items-center gap-2">
                         {table.label}
