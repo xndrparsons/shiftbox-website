@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 
 export default function Footer() {
   return (
-    <footer className="bg-card border-t border-border">
+    <footer className="bg-card border-t border-gray-200 dark:border-gray-700">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
@@ -73,7 +73,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-border mt-8 pt-8 text-center">
+        <div className="border-t border-gray-200 dark:border-gray-700 mt-8 pt-8 text-center">
           <p className="text-sm text-muted-foreground">
             © 2024 Shiftbox. All rights reserved. | Professional automotive services in Cumbria.
           </p>

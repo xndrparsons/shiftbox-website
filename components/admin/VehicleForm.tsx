@@ -12,8 +12,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Search, Plus, X, Loader2 } from "lucide-react"
+import { Search, Plus, X, Loader2, Database } from "lucide-react"
 import { createBrowserClient } from "@supabase/ssr"
+import { DataTableSelector } from "./DataTableSelector"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface VehicleData {
   registration?: string
@@ -55,15 +57,25 @@ interface VehicleData {
   dvla_registration_number?: string
   dvla_tax_status?: string
   dvla_tax_due_date?: string
+  dvla_art_end_date?: string
   dvla_mot_status?: string
   dvla_mot_expiry_date?: string
   dvla_make?: string
-  dvla_year_manufacture?: number
+  dvla_month_of_first_dvla_registration?: string
+  dvla_month_of_first_registration?: string
+  dvla_year_of_manufacture?: number
   dvla_engine_capacity?: number
   dvla_co2_emissions?: number
   dvla_fuel_type?: string
+  dvla_marked_for_export?: boolean
   dvla_colour?: string
+  dvla_type_approval?: string
+  dvla_wheelplan?: string
+  dvla_revenue_weight?: number
+  dvla_real_driving_emissions?: number
+  dvla_date_of_last_v5c_issued?: string
   dvla_euro_status?: string
+  dvla_automated_vehicle?: boolean
 
   exterior_paintwork_condition?: string
   interior_condition?: string
@@ -89,6 +101,13 @@ export default function VehicleForm({
   const [isLoading, setIsLoading] = useState(false)
   const [isLookingUp, setIsLookingUp] = useState(false)
   const [lookupError, setLookupError] = useState<string | null>(null)
+
+  const [isFetchingCCD, setIsFetchingCCD] = useState(false)
+  const [ccdError, setCcdError] = useState<string | null>(null)
+  const [selectedTables, setSelectedTables] = useState<string[]>([])
+  const [estimatedCost, setEstimatedCost] = useState(0)
+  const [ccdDataFetched, setCcdDataFetched] = useState(false)
+
   const [vehicleData, setVehicleData] = useState<VehicleData>(
     initialData || {
       features: [],
@@ -130,19 +149,28 @@ export default function VehicleForm({
         const dvlaData = result.data
         setVehicleData((prev) => ({
           ...prev,
-          // Map DVLA fields to our database structure
           dvla_registration_number: dvlaData.registrationNumber,
           dvla_tax_status: dvlaData.taxStatus,
           dvla_tax_due_date: dvlaData.taxDueDate,
+          dvla_art_end_date: dvlaData.artEndDate,
           dvla_mot_status: dvlaData.motStatus,
           dvla_mot_expiry_date: dvlaData.motExpiryDate,
           dvla_make: dvlaData.make,
-          dvla_year_manufacture: dvlaData.yearOfManufacture,
+          dvla_month_of_first_dvla_registration: dvlaData.monthOfFirstDvlaRegistration,
+          dvla_month_of_first_registration: dvlaData.monthOfFirstRegistration,
+          dvla_year_of_manufacture: dvlaData.yearOfManufacture,
           dvla_engine_capacity: dvlaData.engineCapacity,
           dvla_co2_emissions: dvlaData.co2Emissions,
           dvla_fuel_type: dvlaData.fuelType,
+          dvla_marked_for_export: dvlaData.markedForExport,
           dvla_colour: dvlaData.colour,
+          dvla_type_approval: dvlaData.typeApproval,
+          dvla_wheelplan: dvlaData.wheelplan,
+          dvla_revenue_weight: dvlaData.revenueWeight,
+          dvla_real_driving_emissions: dvlaData.realDrivingEmissions,
+          dvla_date_of_last_v5c_issued: dvlaData.dateOfLastV5CIssued,
           dvla_euro_status: dvlaData.euroStatus,
+          dvla_automated_vehicle: dvlaData.automatedVehicle,
 
           // Also populate main vehicle fields if not already set
           make: prev.make || dvlaData.make,
@@ -160,6 +188,69 @@ export default function VehicleForm({
     } finally {
       setIsLookingUp(false)
     }
+  }
+
+  const handleCheckCarDetailsLookup = async () => {
+    if (!vehicleData.registration || selectedTables.length === 0) return
+
+    setIsFetchingCCD(true)
+    setCcdError(null)
+
+    try {
+      const response = await fetch("/api/checkcardetails-lookup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          registration: vehicleData.registration,
+          tables: selectedTables,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success && result.data) {
+        // Store the fetched data immediately in the database
+        const { error: saveError } = await supabase.from("vehicles").upsert(
+          {
+            registration: vehicleData.registration,
+            ...result.mappedData,
+            ccd_fetch_cost: result.cost,
+          },
+          {
+            onConflict: "registration",
+          },
+        )
+
+        if (saveError) {
+          console.error("Error saving CheckCarDetails data:", saveError)
+          setCcdError("Failed to save fetched data")
+          return
+        }
+
+        // Update the form with the fetched data
+        setVehicleData((prev) => ({
+          ...prev,
+          ...result.mappedData,
+        }))
+
+        setCcdDataFetched(true)
+        setSelectedTables([]) // Clear selection after successful fetch
+      } else {
+        setCcdError(result.error || "Failed to fetch vehicle data")
+      }
+    } catch (error) {
+      console.error("Error fetching CheckCarDetails data:", error)
+      setCcdError("Failed to connect to CheckCarDetails service")
+    } finally {
+      setIsFetchingCCD(false)
+    }
+  }
+
+  const handleDataTableSelectionChange = (tables: string[], cost: number) => {
+    setSelectedTables(tables)
+    setEstimatedCost(cost)
   }
 
   const addFeature = () => {
@@ -236,6 +327,8 @@ export default function VehicleForm({
                 onChange={(e) => {
                   setVehicleData((prev) => ({ ...prev, registration: e.target.value.toUpperCase() }))
                   setLookupError(null) // Clear error when user types
+                  setCcdError(null) // Clear CCD error too
+                  setCcdDataFetched(false) // Reset CCD fetch status
                 }}
                 placeholder="e.g. AB21 CDE"
                 className="uppercase"
@@ -249,7 +342,7 @@ export default function VehicleForm({
                 disabled={!vehicleData.registration || isLookingUp}
               >
                 {isLookingUp ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
-                Lookup
+                DVLA Lookup
               </Button>
             </div>
           </div>
@@ -258,6 +351,59 @@ export default function VehicleForm({
           </p>
         </CardContent>
       </Card>
+
+      {vehicleData.registration && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              Enhanced Vehicle Data (CheckCarDetails)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <DataTableSelector
+              onSelectionChange={handleDataTableSelectionChange}
+              disabled={isFetchingCCD || ccdDataFetched}
+              initialSelection={selectedTables}
+            />
+
+            {selectedTables.length > 0 && !ccdDataFetched && (
+              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                <div>
+                  <p className="font-medium">Ready to fetch enhanced data</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedTables.length} table{selectedTables.length !== 1 ? "s" : ""} selected • Estimated cost: £
+                    {estimatedCost.toFixed(2)}
+                  </p>
+                </div>
+                <Button type="button" onClick={handleCheckCarDetailsLookup} disabled={isFetchingCCD}>
+                  {isFetchingCCD ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Database className="h-4 w-4 mr-2" />
+                  )}
+                  Fetch Data
+                </Button>
+              </div>
+            )}
+
+            {ccdDataFetched && (
+              <Alert>
+                <Database className="h-4 w-4" />
+                <AlertDescription>
+                  Enhanced vehicle data has been fetched and saved. Cost: £{estimatedCost.toFixed(2)}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {ccdError && (
+              <Alert variant="destructive">
+                <AlertDescription>{ccdError}</AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {vehicleData.dvla_registration_number && (
         <Card>
@@ -290,6 +436,20 @@ export default function VehicleForm({
             <div>
               <Label>DVLA Colour</Label>
               <p className="text-sm font-medium">{vehicleData.dvla_colour || "N/A"}</p>
+            </div>
+            <div>
+              <Label>Type Approval</Label>
+              <p className="text-sm font-medium">{vehicleData.dvla_type_approval || "N/A"}</p>
+            </div>
+            <div>
+              <Label>Revenue Weight</Label>
+              <p className="text-sm font-medium">
+                {vehicleData.dvla_revenue_weight ? `${vehicleData.dvla_revenue_weight}kg` : "N/A"}
+              </p>
+            </div>
+            <div>
+              <Label>Automated Vehicle</Label>
+              <p className="text-sm font-medium">{vehicleData.dvla_automated_vehicle ? "Yes" : "No"}</p>
             </div>
           </CardContent>
         </Card>

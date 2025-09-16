@@ -3,20 +3,28 @@ import { type NextRequest, NextResponse } from "next/server"
 interface VehicleLookupResponse {
   success: boolean
   data?: {
-    registration: string
-    make: string
-    model: string
-    year: number
-    fuel_type: string
-    transmission?: string
-    body_type?: string
-    color: string
-    engine_size?: number
-    co2_emissions?: number
-    tax_status?: string
-    tax_due_date?: string
-    mot_status?: string
-    mot_expiry_date?: string
+    registrationNumber: string
+    taxStatus?: string
+    taxDueDate?: string
+    artEndDate?: string
+    motStatus?: string
+    motExpiryDate?: string
+    make?: string
+    monthOfFirstDvlaRegistration?: string
+    monthOfFirstRegistration?: string
+    yearOfManufacture?: number
+    engineCapacity?: number
+    co2Emissions?: number
+    fuelType?: string
+    markedForExport?: boolean
+    colour?: string
+    typeApproval?: string
+    wheelplan?: string
+    revenueWeight?: number
+    realDrivingEmissions?: string
+    dateOfLastV5CIssued?: string
+    euroStatus?: string
+    automatedVehicle?: boolean
   }
   error?: string
   source?: "dvla" | "mock"
@@ -24,37 +32,55 @@ interface VehicleLookupResponse {
 
 const mockVehicleDatabase: Record<string, any> = {
   BM21ABC: {
+    registrationNumber: "BM21ABC",
     make: "BMW",
-    model: "3 SERIES",
-    year: 2021,
-    fuel_type: "DIESEL",
-    color: "SILVER",
-    engine_size: 1995,
-    co2_emissions: 142,
-    tax_status: "TAXED",
-    mot_status: "VALID",
+    yearOfManufacture: 2021,
+    fuelType: "DIESEL",
+    colour: "SILVER",
+    engineCapacity: 1995,
+    co2Emissions: 142,
+    taxStatus: "Taxed",
+    motStatus: "Valid",
+    motExpiryDate: "2025-03-15",
+    taxDueDate: "2024-12-01",
+    euroStatus: "Euro 6",
+    typeApproval: "M1",
+    automatedVehicle: false,
+    markedForExport: false,
   },
   AU21XYZ: {
+    registrationNumber: "AU21XYZ",
     make: "AUDI",
-    model: "A4",
-    year: 2021,
-    fuel_type: "DIESEL",
-    color: "BLACK",
-    engine_size: 1968,
-    co2_emissions: 118,
-    tax_status: "TAXED",
-    mot_status: "VALID",
+    yearOfManufacture: 2021,
+    fuelType: "DIESEL",
+    colour: "BLACK",
+    engineCapacity: 1968,
+    co2Emissions: 118,
+    taxStatus: "Taxed",
+    motStatus: "Valid",
+    motExpiryDate: "2025-05-20",
+    taxDueDate: "2024-11-15",
+    euroStatus: "Euro 6",
+    typeApproval: "M1",
+    automatedVehicle: false,
+    markedForExport: false,
   },
   MB21DEF: {
+    registrationNumber: "MB21DEF",
     make: "MERCEDES-BENZ",
-    model: "C CLASS",
-    year: 2021,
-    fuel_type: "PETROL",
-    color: "WHITE",
-    engine_size: 1496,
-    co2_emissions: 138,
-    tax_status: "TAXED",
-    mot_status: "VALID",
+    yearOfManufacture: 2021,
+    fuelType: "PETROL",
+    colour: "WHITE",
+    engineCapacity: 1496,
+    co2Emissions: 138,
+    taxStatus: "Taxed",
+    motStatus: "Valid",
+    motExpiryDate: "2025-07-10",
+    taxDueDate: "2024-10-30",
+    euroStatus: "Euro 6",
+    typeApproval: "M1",
+    automatedVehicle: false,
+    markedForExport: false,
   },
 }
 
@@ -113,24 +139,12 @@ export async function POST(request: NextRequest) {
     if (dvlaApiKey) {
       try {
         const dvlaData = await lookupVehicleFromDVLA(cleanReg)
+        console.log("[v0] DVLA data received:", Object.keys(dvlaData))
 
         return NextResponse.json({
           success: true,
           source: "dvla",
-          data: {
-            registration: cleanReg,
-            make: dvlaData.make,
-            model: dvlaData.model,
-            year: dvlaData.yearOfManufacture,
-            fuel_type: dvlaData.fuelType,
-            color: dvlaData.colour,
-            engine_size: dvlaData.engineCapacity,
-            co2_emissions: dvlaData.co2Emissions,
-            tax_status: dvlaData.taxStatus,
-            tax_due_date: dvlaData.taxDueDate,
-            mot_status: dvlaData.motStatus,
-            mot_expiry_date: dvlaData.motExpiryDate,
-          },
+          data: dvlaData, // Return the full DVLA response as-is
         })
       } catch (dvlaError) {
         console.error("DVLA API error:", dvlaError)
@@ -146,10 +160,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         source: "mock",
-        data: {
-          registration: cleanReg,
-          ...vehicleData,
-        },
+        data: vehicleData,
       })
     }
 
