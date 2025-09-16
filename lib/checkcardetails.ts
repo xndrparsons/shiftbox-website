@@ -252,10 +252,11 @@ export function getCheckCarDetailsAPI(): CheckCarDetailsAPI {
 }
 
 // Helper function to map API response to database fields
-export function mapCheckCarDetailsToDatabase(data: any, tablesFetched: string[]) {
+export function mapCheckCarDetailsToDatabase(data: any, tablesFetched: string[], fetchCost = 0) {
   const mapped: Record<string, any> = {
     ccd_tables_fetched: tablesFetched,
     ccd_last_fetched: new Date(),
+    ccd_fetch_cost: fetchCost,
   }
 
   // Map vehicleregistration data

@@ -72,7 +72,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CheckCarD
       }
 
       // Map the API response to database fields
-      const mappedData = mapCheckCarDetailsToDatabase(result.data, result.tablesFetched)
+      const mappedData = mapCheckCarDetailsToDatabase(result.data, result.tablesFetched, result.cost)
 
       console.log("[v0] CheckCarDetails data fetched successfully, cost:", result.cost)
 
