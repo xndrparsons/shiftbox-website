@@ -29,7 +29,7 @@ export function ApiTestButton() {
         },
         body: JSON.stringify({
           registration: "EA65AMX", // Test VRN
-          selectedTables: ["vehicleregistration"], // Just test basic registration
+          tables: ["vehicleregistration"], // Just test basic registration
         }),
       })
 

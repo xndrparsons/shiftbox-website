@@ -19,7 +19,6 @@ async function testCheckCarDetailsAPI() {
     "vehiclevaluation",
     "ukvehicledata",
     "carhistorycheck",
-    "vehicleimage"
   ]
 
   console.log("📋 Testing available data tables...")
