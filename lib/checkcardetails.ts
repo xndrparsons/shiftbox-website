@@ -10,6 +10,11 @@ export interface DataTableOption {
   cost: number // Cost in GBP
 }
 
+export interface PricingData {
+  tables: Record<string, number>
+  lastUpdated: string
+}
+
 // Available data tables with costs (update these based on current pricing)
 export const AVAILABLE_DATA_TABLES: DataTableOption[] = [
   {
@@ -148,6 +153,60 @@ class CheckCarDetailsAPI {
         tablesFetched: [],
       }
     }
+  }
+
+  async fetchCurrentPricing(): Promise<PricingData | null> {
+    try {
+      console.log("[v0] Fetching current pricing from CheckCarDetails API")
+
+      const url = `${this.config.baseUrl}/pricing?apikey=${this.config.apiKey}`
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "User-Agent": "ShiftBox-Vehicle-System/1.0",
+        },
+      })
+
+      console.log("[v0] CheckCarDetails pricing response status:", response.status)
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log("[v0] Successfully fetched pricing data")
+        return {
+          tables: data.tables || {},
+          lastUpdated: new Date().toISOString(),
+        }
+      } else {
+        const errorText = await response.text()
+        console.error("[v0] CheckCarDetails pricing API error:", errorText)
+        return null
+      }
+    } catch (error) {
+      console.error("[v0] Error fetching pricing:", error)
+      return null
+    }
+  }
+
+  async getAvailableTablesWithCurrentPricing(): Promise<DataTableOption[]> {
+    try {
+      const pricingData = await this.fetchCurrentPricing()
+
+      if (pricingData && pricingData.tables) {
+        // Update table costs with current pricing
+        return AVAILABLE_DATA_TABLES.map((table) => ({
+          ...table,
+          cost: pricingData.tables[table.name] || table.cost,
+        }))
+      }
+    } catch (error) {
+      console.error("[v0] Error fetching current pricing, using default:", error)
+    }
+
+    // Fallback to default pricing
+    return AVAILABLE_DATA_TABLES
   }
 
   // Get available tables with costs
