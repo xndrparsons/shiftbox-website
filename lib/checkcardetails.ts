@@ -77,7 +77,7 @@ export interface CheckCarDetailsResponse {
   tablesFetched: string[]
 }
 
-class CheckCarDetailsAPI {
+export class CheckCarDetailsAPI {
   private config: CheckCarDetailsConfig
 
   constructor(config: CheckCarDetailsConfig) {
@@ -228,9 +228,9 @@ let checkCarDetailsAPI: CheckCarDetailsAPI | null = null
 
 export function getCheckCarDetailsAPI(): CheckCarDetailsAPI {
   if (!checkCarDetailsAPI) {
-    const apiKey = process.env.CHECKCARDETAILS_API_KEY
+    const apiKey = process.env.CHECKCARDETAILS_TEST_API_KEY
     if (!apiKey) {
-      throw new Error("CHECKCARDETAILS_API_KEY environment variable not set")
+      throw new Error("CHECKCARDETAILS_TEST_API_KEY environment variable not set")
     }
     checkCarDetailsAPI = new CheckCarDetailsAPI({ apiKey })
   }

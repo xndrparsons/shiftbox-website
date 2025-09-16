@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getCheckCarDetailsAPI } from "@/lib/checkcardetails"
 
 interface PricingResponse {
   success: boolean
@@ -14,7 +13,20 @@ export async function GET(request: NextRequest): Promise<NextResponse<PricingRes
   console.log("[v0] CheckCarDetails pricing API called")
 
   try {
-    const checkCarDetailsAPI = getCheckCarDetailsAPI()
+    const apiKey = process.env.CHECKCARDETAILS_TEST_API_KEY
+    if (!apiKey) {
+      console.error("[v0] CHECKCARDETAILS_TEST_API_KEY environment variable not set")
+      return NextResponse.json(
+        {
+          success: false,
+          error: "CHECKCARDETAILS_TEST_API_KEY environment variable not set",
+          timestamp: new Date().toISOString(),
+        },
+        { status: 500 },
+      )
+    }
+
+    const checkCarDetailsAPI = new (await import("@/lib/checkcardetails")).CheckCarDetailsAPI({ apiKey })
 
     // Fetch current pricing from CheckCarDetails API
     const pricingData = await checkCarDetailsAPI.fetchCurrentPricing()
