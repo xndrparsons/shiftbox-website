@@ -25,17 +25,28 @@ export default function AdminLogin() {
     setError("")
 
     try {
+      console.log("[v0] Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL)
+      console.log("[v0] Supabase client created:", !!supabase)
+      console.log("[v0] Attempting login with email:", email)
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
+      console.log("[v0] Login response error:", error)
+
       if (error) {
+        console.log("[v0] Login failed with error:", error.message)
         setError(error.message)
       } else {
+        console.log("[v0] Login successful, redirecting to admin")
         router.push("/admin")
       }
     } catch (err) {
+      console.log("[v0] Caught exception during login:", err)
+      console.log("[v0] Exception type:", typeof err)
+      console.log("[v0] Exception details:", JSON.stringify(err, null, 2))
       setError("An unexpected error occurred")
     } finally {
       setLoading(false)
