@@ -135,7 +135,7 @@ importers:
         specifier: 15.1.6
         version: 15.1.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       next-themes:
-        specifier: 0.4.6
+        specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react:
         specifier: ^19
