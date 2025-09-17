@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: "About Shiftbox",
   description:
-    "Providing quality cars and expert services.",
+    "Your trusted automotive partner in the Lake District, providing quality cars and expert services since 2015.",
 }
 
 export default function AboutPage() {
@@ -16,7 +16,8 @@ export default function AboutPage() {
             <div className="text-center">
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">About Shiftbox</h1>
               <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                Providing quality cars and expert services.
+                Your trusted automotive partner in the Lake District, providing quality cars and expert services since
+                2015.
               </p>
             </div>
           </div>
@@ -29,17 +30,18 @@ export default function AboutPage() {
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Our Story</h2>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Founded in 2025 outside of Milnthorpe, Shiftbox began serving the Lake District community with
-                  quality pre-owned vehicles and premium automotive services.
+                  Founded in 2015 in the heart of Kendal, Shiftbox has been serving the Lake District community with
+                  premium automotive services and quality pre-owned vehicles. What started as a small family business
+                  has grown into the region's most trusted automotive partner.
                 </p>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  We specialize in carefully sourcing great vehicles and providing comprehensive automotive services, from
-                  routine maintenance and servicing to comprehensive detailing. Our commitment to quality and customer satisfaction
-                  intends to make us a cornerstone of the local automotive community.
+                  We specialize in sourcing exceptional vehicles and providing comprehensive automotive services, from
+                  routine maintenance to detailed restoration work. Our commitment to quality and customer satisfaction
+                  has made us a cornerstone of the local automotive community.
                 </p>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Located in the heart of beautiful countryside, we understand the unique needs of drivers in the Lake District, whether
-                  you're navigating country roads or travelling further afield.
+                  Located in beautiful Cumbria, we understand the unique needs of drivers in the Lake District, whether
+                  you're navigating country roads or exploring the fells.
                 </p>
               </div>
               <div>

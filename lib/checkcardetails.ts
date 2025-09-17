@@ -265,6 +265,7 @@ export function mapCheckCarDetailsToDatabase(data: any, tablesFetched: string[],
     fuel_type: "Unknown",
     transmission: "Unknown",
     status: "available",
+    year: 0, // Default year when not available from API
   }
 
   // Map vehicleregistration data
@@ -293,6 +294,16 @@ export function mapCheckCarDetailsToDatabase(data: any, tablesFetched: string[],
     }
     if (vr.Transmission) {
       mapped.transmission = vr.Transmission
+    }
+
+    if (vr.YearOfManufacture) {
+      mapped.year = Number.parseInt(vr.YearOfManufacture, 10) || 0
+    } else if (vr.DateFirstRegistered) {
+      // Extract year from date string (e.g., "2015-03-15" -> 2015)
+      const yearMatch = vr.DateFirstRegistered.match(/(\d{4})/)
+      if (yearMatch) {
+        mapped.year = Number.parseInt(yearMatch[1], 10) || 0
+      }
     }
 
     // Map all other vehicleregistration fields with null checks
