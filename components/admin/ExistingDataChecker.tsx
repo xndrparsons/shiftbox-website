@@ -44,11 +44,10 @@ export function ExistingDataChecker() {
       const { data, error: queryError } = await supabase
         .from("vehicles")
         .select("registration, make, model, year, ccd_last_fetched, ccd_fetch_cost, ccd_tables_fetched")
-        .eq("registration", registration.toUpperCase())
-        .single()
+        .eq("registration", registration.trim().toUpperCase())
+        .maybeSingle()
 
-      if (queryError && queryError.code !== "PGRST116") {
-        // PGRST116 is "not found" error, which is expected for new vehicles
+      if (queryError) {
         throw queryError
       }
 
@@ -64,7 +63,7 @@ export function ExistingDataChecker() {
       }
     } catch (err) {
       console.error("Error checking existing data:", err)
-      setError("Failed to check for existing data")
+      setError(`Failed to check for existing data: ${err instanceof Error ? err.message : "Unknown error"}`)
     } finally {
       setIsChecking(false)
     }
