@@ -4,7 +4,7 @@ import Link from "next/link"
 
 export default function Unauthorized() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-md text-center">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-red-600">Access Denied</CardTitle>

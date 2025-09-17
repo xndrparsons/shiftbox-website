@@ -254,65 +254,97 @@ export function getCheckCarDetailsAPI(): CheckCarDetailsAPI {
 // Helper function to map API response to database fields
 export function mapCheckCarDetailsToDatabase(data: any, tablesFetched: string[], fetchCost = 0) {
   const mapped: Record<string, any> = {
+    // Core tracking fields
     ccd_tables_fetched: tablesFetched,
     ccd_last_fetched: new Date(),
     ccd_fetch_cost: fetchCost,
+
+    // Essential vehicle fields with fallbacks
+    make: "Unknown",
+    model: "Unknown",
+    fuel_type: "Unknown",
+    transmission: "Unknown",
+    status: "available",
   }
 
   // Map vehicleregistration data
   if (data.vehicleregistration) {
     const vr = data.vehicleregistration
-    mapped.ccd_date_of_last_update = vr.DateOfLastUpdate
-    mapped.ccd_vehicle_class = vr.VehicleClass
-    mapped.ccd_vin = vr.Vin
-    mapped.ccd_engine_number = vr.EngineNumber
-    mapped.ccd_make_model = vr.MakeModel
-    mapped.ccd_model = vr.Model
-    mapped.ccd_date_first_registered = vr.DateFirstRegistered
-    mapped.ccd_date_first_registered_uk = vr.DateFirstRegisteredUk
-    mapped.ccd_transmission = vr.Transmission
-    mapped.ccd_fuel_type = vr.FuelType
-    mapped.ccd_engine_capacity = vr.EngineCapacity
-    mapped.ccd_co2_emissions = vr.Co2Emissions
+
+    // Update core fields if available
+    if (vr.Make) {
+      mapped.make = vr.Make
+    } else if (vr.MakeModel) {
+      // Try to extract make from MakeModel string (e.g., "FORD FOCUS" -> "FORD")
+      const makeModelParts = vr.MakeModel.split(" ")
+      mapped.make = makeModelParts[0] || "Unknown"
+    }
+
+    if (vr.Model) {
+      mapped.model = vr.Model
+    } else if (vr.MakeModel) {
+      // Try to extract model from MakeModel string (e.g., "FORD FOCUS" -> "FOCUS")
+      const makeModelParts = vr.MakeModel.split(" ")
+      mapped.model = makeModelParts.slice(1).join(" ") || "Unknown"
+    }
+
+    if (vr.FuelType) {
+      mapped.fuel_type = vr.FuelType
+    }
+    if (vr.Transmission) {
+      mapped.transmission = vr.Transmission
+    }
+
+    // Map all other vehicleregistration fields with null checks
+    if (vr.DateOfLastUpdate) mapped.ccd_date_of_last_update = vr.DateOfLastUpdate
+    if (vr.VehicleClass) mapped.ccd_vehicle_class = vr.VehicleClass
+    if (vr.Vin) mapped.ccd_vin = vr.Vin
+    if (vr.EngineNumber) mapped.ccd_engine_number = vr.EngineNumber
+    if (vr.MakeModel) mapped.ccd_make_model = vr.MakeModel
+    if (vr.Model) mapped.ccd_model = vr.Model
+    if (vr.DateFirstRegistered) mapped.ccd_date_first_registered = vr.DateFirstRegistered
+    if (vr.DateFirstRegisteredUk) mapped.ccd_date_first_registered_uk = vr.DateFirstRegisteredUk
+    if (vr.EngineCapacity) mapped.ccd_engine_capacity = vr.EngineCapacity
+    if (vr.Co2Emissions) mapped.ccd_co2_emissions = vr.Co2Emissions
   }
 
-  // Map MOT data
+  // Map MOT data with null checks
   if (data.mot) {
     const mot = data.mot
-    mapped.ccd_mot_status = mot.MotStatus
-    mapped.ccd_mot_expiry_date = mot.MotExpiryDate
-    mapped.ccd_mot_test_result = mot.MotTestResult
-    mapped.ccd_mot_test_date = mot.MotTestDate
-    mapped.ccd_mot_test_number = mot.MotTestNumber
-    mapped.ccd_mot_test_mileage = mot.MotTestMileage
+    if (mot.MotStatus) mapped.ccd_mot_status = mot.MotStatus
+    if (mot.MotExpiryDate) mapped.ccd_mot_expiry_date = mot.MotExpiryDate
+    if (mot.MotTestResult) mapped.ccd_mot_test_result = mot.MotTestResult
+    if (mot.MotTestDate) mapped.ccd_mot_test_date = mot.MotTestDate
+    if (mot.MotTestNumber) mapped.ccd_mot_test_number = mot.MotTestNumber
+    if (mot.MotTestMileage) mapped.ccd_mot_test_mileage = mot.MotTestMileage
   }
 
-  // Map mileage data
+  // Map mileage data with null checks
   if (data.mileage) {
     const mileage = data.mileage
-    mapped.ccd_current_mileage = mileage.CurrentMileage
-    mapped.ccd_mileage_history = JSON.stringify(mileage.MileageHistory)
-    mapped.ccd_average_annual_mileage = mileage.AverageAnnualMileage
+    if (mileage.CurrentMileage) mapped.ccd_current_mileage = mileage.CurrentMileage
+    if (mileage.MileageHistory) mapped.ccd_mileage_history = JSON.stringify(mileage.MileageHistory)
+    if (mileage.AverageAnnualMileage) mapped.ccd_average_annual_mileage = mileage.AverageAnnualMileage
   }
 
-  // Map vehiclespecs data (when available)
+  // Map vehiclespecs data with null checks (when available)
   if (data.vehiclespecs) {
     const specs = data.vehiclespecs
-    mapped.ccd_engine_power = specs.EnginePower
-    mapped.ccd_max_speed = specs.MaxSpeed
-    mapped.ccd_acceleration = specs.Acceleration
-    mapped.ccd_fuel_consumption = specs.FuelConsumption
-    mapped.ccd_dimensions = JSON.stringify(specs.Dimensions)
-    mapped.ccd_weight = specs.Weight
+    if (specs.EnginePower) mapped.ccd_engine_power = specs.EnginePower
+    if (specs.MaxSpeed) mapped.ccd_max_speed = specs.MaxSpeed
+    if (specs.Acceleration) mapped.ccd_acceleration = specs.Acceleration
+    if (specs.FuelConsumption) mapped.ccd_fuel_consumption = specs.FuelConsumption
+    if (specs.Dimensions) mapped.ccd_dimensions = JSON.stringify(specs.Dimensions)
+    if (specs.Weight) mapped.ccd_weight = specs.Weight
   }
 
-  // Map vehiclevaluation data (when available)
+  // Map vehiclevaluation data with null checks (when available)
   if (data.vehiclevaluation) {
     const valuation = data.vehiclevaluation
-    mapped.ccd_trade_value = valuation.TradeValue
-    mapped.ccd_retail_value = valuation.RetailValue
-    mapped.ccd_private_value = valuation.PrivateValue
-    mapped.ccd_valuation_date = valuation.ValuationDate
+    if (valuation.TradeValue) mapped.ccd_trade_value = valuation.TradeValue
+    if (valuation.RetailValue) mapped.ccd_retail_value = valuation.RetailValue
+    if (valuation.PrivateValue) mapped.ccd_private_value = valuation.PrivateValue
+    if (valuation.ValuationDate) mapped.ccd_valuation_date = valuation.ValuationDate
   }
 
   return mapped
