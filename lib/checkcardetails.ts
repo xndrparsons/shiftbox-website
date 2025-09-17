@@ -266,6 +266,16 @@ export function mapCheckCarDetailsToDatabase(data: any, tablesFetched: string[],
     transmission: "Unknown",
     status: "available",
     year: 0, // Default year when not available from API
+    price: 0, // Default price when not available from API
+
+    // Additional fields that might have NOT NULL constraints
+    registration: "", // Will be set from the registration parameter
+    body_type: "Unknown",
+    color: "Unknown",
+    mileage: 0,
+    doors: 4, // Common default
+    seats: 5, // Common default
+    engine_size: "Unknown",
   }
 
   // Map vehicleregistration data
@@ -306,17 +316,19 @@ export function mapCheckCarDetailsToDatabase(data: any, tablesFetched: string[],
       }
     }
 
+    if (vr.BodyType) mapped.body_type = vr.BodyType
+    if (vr.Colour || vr.Color) mapped.color = vr.Colour || vr.Color
+    if (vr.EngineSize) mapped.engine_size = vr.EngineSize
+
     // Map all other vehicleregistration fields with null checks
     if (vr.DateOfLastUpdate) mapped.ccd_date_of_last_update = vr.DateOfLastUpdate
     if (vr.VehicleClass) mapped.ccd_vehicle_class = vr.VehicleClass
     if (vr.Vin) mapped.ccd_vin = vr.Vin
     if (vr.EngineNumber) mapped.ccd_engine_number = vr.EngineNumber
     if (vr.MakeModel) mapped.ccd_make_model = vr.MakeModel
-    if (vr.Model) mapped.ccd_model = vr.Model
     if (vr.DateFirstRegistered) mapped.ccd_date_first_registered = vr.DateFirstRegistered
     if (vr.DateFirstRegisteredUk) mapped.ccd_date_first_registered_uk = vr.DateFirstRegisteredUk
     if (vr.EngineCapacity) mapped.ccd_engine_capacity = vr.EngineCapacity
-    if (vr.Co2Emissions) mapped.ccd_co2_emissions = vr.Co2Emissions
   }
 
   // Map MOT data with null checks
@@ -332,10 +344,13 @@ export function mapCheckCarDetailsToDatabase(data: any, tablesFetched: string[],
 
   // Map mileage data with null checks
   if (data.mileage) {
-    const mileage = data.mileage
-    if (mileage.CurrentMileage) mapped.ccd_current_mileage = mileage.CurrentMileage
-    if (mileage.MileageHistory) mapped.ccd_mileage_history = JSON.stringify(mileage.MileageHistory)
-    if (mileage.AverageAnnualMileage) mapped.ccd_average_annual_mileage = mileage.AverageAnnualMileage
+    const mileageData = data.mileage
+    if (mileageData.CurrentMileage) {
+      mapped.ccd_current_mileage = mileageData.CurrentMileage
+      mapped.mileage = mileageData.CurrentMileage // Also set the main mileage field
+    }
+    if (mileageData.MileageHistory) mapped.ccd_mileage_history = JSON.stringify(mileageData.MileageHistory)
+    if (mileageData.AverageAnnualMileage) mapped.ccd_average_annual_mileage = mileageData.AverageAnnualMileage
   }
 
   // Map vehiclespecs data with null checks (when available)
@@ -347,6 +362,11 @@ export function mapCheckCarDetailsToDatabase(data: any, tablesFetched: string[],
     if (specs.FuelConsumption) mapped.ccd_fuel_consumption = specs.FuelConsumption
     if (specs.Dimensions) mapped.ccd_dimensions = JSON.stringify(specs.Dimensions)
     if (specs.Weight) mapped.ccd_weight = specs.Weight
+
+    if (specs.Doors) mapped.doors = specs.Doors
+    if (specs.Seats) mapped.seats = specs.Seats
+    if (specs.BHP) mapped.bhp = specs.BHP
+    if (specs.Torque) mapped.torque = specs.Torque
   }
 
   // Map vehiclevaluation data with null checks (when available)
