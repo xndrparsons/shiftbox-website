@@ -1,129 +1,80 @@
-import { createClient } from "@/lib/supabase/server"
-import { notFound } from "next/navigation"
 import Image from "next/image"
+import Link from "next/link"
+import { notFound } from "next/navigation"
+import type { Metadata } from "next"
+
+import { supabaseServer } from "@shiftbox/auth/supabase.server" // shared server client
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  Calendar,
-  Gauge,
-  Fuel,
-  Settings,
-  Car,
-  Palette,
-  Hash,
-  DoorOpen,
-  Shield,
-  AlertTriangle,
-  CheckCircle,
-  Star,
+  Calendar, Gauge, Fuel, Settings, Car, Palette, Hash, DoorOpen, Shield,
+  AlertTriangle, CheckCircle, Star,
 } from "lucide-react"
-import Link from "next/link"
 
-interface Vehicle {
-  id: string
-  make: string
-  model: string
-  year: number
-  price: number
-  mileage: number | null
-  fuel_type: string | null
-  transmission: string | null
-  body_type: string | null
-  color: string | null
-  engine_size: string | null
-  doors: number | null
-  description: string | null
-  features: string[] | null
-  images: string[] | null
-  status: string
+// --- Utils (we can move these to /lib/utils later) ---
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 0 }).format(price)
 
-  // DVLA fields
-  dvla_registration_number?: string
-  dvla_tax_status?: string
-  dvla_tax_due_date?: string
-  dvla_mot_status?: string
-  dvla_mot_expiry_date?: string
-  dvla_make?: string
-  dvla_year_manufacture?: number
-  dvla_engine_capacity?: number
-  dvla_co2_emissions?: number
-  dvla_fuel_type?: string
-  dvla_colour?: string
-  dvla_euro_status?: string
+const formatMileage = (mileage: number | null) =>
+  mileage ? new Intl.NumberFormat("en-GB").format(mileage) : "N/A"
 
-  // Condition fields
-  exterior_paintwork_condition?: string
-  interior_condition?: string
-  engine_condition?: string
-  presence_of_rust?: boolean
-  rust_locations?: string[]
-  bodywork_damage?: string
-  mechanical_issues?: string
-  service_history_status?: string
-  previous_owners?: number
-  accident_history?: boolean
-  accident_details?: string
-  overall_condition_rating?: number
-  condition_notes?: string
+const getConditionColor = (condition?: string) => {
+  switch (condition?.toLowerCase()) {
+    case "excellent": return "text-green-600"
+    case "very good": return "text-green-500"
+    case "good": return "text-blue-600"
+    case "fair": return "text-yellow-600"
+    case "poor": return "text-red-600"
+    default: return "text-muted-foreground"
+  }
 }
 
-export default async function VehicleDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const supabase = await createClient()
-
-  const { data: vehicle, error } = await supabase.from("vehicles").select("*").eq("id", id).single()
-
-  if (error || !vehicle) {
-    notFound()
+const getConditionIcon = (condition?: string) => {
+  switch (condition?.toLowerCase()) {
+    case "excellent": return <CheckCircle className="h-4 w-4 text-green-600" />
+    case "very good": return <CheckCircle className="h-4 w-4 text-green-500" />
+    case "good": return <CheckCircle className="h-4 w-4 text-blue-600" />
+    case "fair": return <AlertTriangle className="h-4 w-4 text-yellow-600" />
+    case "poor": return <AlertTriangle className="h-4 w-4 text-red-600" />
+    default: return null
   }
+}
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-GB", {
-      style: "currency",
-      currency: "GBP",
-      minimumFractionDigits: 0,
-    }).format(price)
-  }
+// Revalidate this page periodically (and we can tag-revalidate on publish/price change)
+export const revalidate = 60
 
-  const formatMileage = (mileage: number | null) => {
-    if (!mileage) return "N/A"
-    return new Intl.NumberFormat("en-GB").format(mileage)
-  }
+// Per-vehicle SEO based on slug
+export async function generateMetadata(
+  { params }: { params: { slug: string } }
+): Promise<Metadata> {
+  const supabase = supabaseServer()
+  const { data } = await supabase.rpc("get_vehicle_full_by_slug", { p_slug: params.slug })
+  if (!data) return {}
 
-  const getConditionColor = (condition: string | undefined) => {
-    switch (condition?.toLowerCase()) {
-      case "excellent":
-        return "text-green-600"
-      case "very good":
-        return "text-green-500"
-      case "good":
-        return "text-blue-600"
-      case "fair":
-        return "text-yellow-600"
-      case "poor":
-        return "text-red-600"
-      default:
-        return "text-gray-600"
-    }
-  }
+  const title = `${data.make} ${data.model} ${data.registration ?? ""} | Shiftbox`.trim()
+  const description =
+    data.description_md?.slice(0, 160) ??
+    `Used ${data.make} ${data.model} available at Shiftbox.`
 
-  const getConditionIcon = (condition: string | undefined) => {
-    switch (condition?.toLowerCase()) {
-      case "excellent":
-        return <CheckCircle className="h-4 w-4 text-green-600" />
-      case "very good":
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      case "good":
-        return <CheckCircle className="h-4 w-4 text-blue-600" />
-      case "fair":
-        return <AlertTriangle className="h-4 w-4 text-yellow-600" />
-      case "poor":
-        return <AlertTriangle className="h-4 w-4 text-red-600" />
-      default:
-        return null
-    }
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: data.hero_image_url ? [{ url: data.hero_image_url, width: 1200, height: 630 }] : [],
+    },
   }
+}
+
+export default async function VehicleDetailPage({ params }: { params: { slug: string } }) {
+  const supabase = supabaseServer()
+
+  // Fetch via RPC scoped to published vehicles (RLS-friendly)
+  const { data: vehicle, error } = await supabase.rpc("get_vehicle_full_by_slug", { p_slug: params.slug })
+  if (error) throw error
+  if (!vehicle) notFound()
 
   const vehicleTitle = `${vehicle.make} ${vehicle.model}`
 
@@ -138,16 +89,16 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Image Gallery */}
+          {/* Image/Gallery */}
           <div className="space-y-4">
             <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
               <Image
-                src={
-                  vehicle.images?.[0] || `/placeholder.svg?height=400&width=600&query=${vehicle.make} ${vehicle.model}`
-                }
+                src={vehicle.images?.[0] || `/placeholder.svg?height=400&width=600&query=${vehicle.make} ${vehicle.model}`}
                 alt={vehicleTitle}
                 fill
                 className="object-cover"
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                priority
               />
               <div className="absolute top-4 right-4">
                 <Badge variant={vehicle.status === "available" ? "default" : "secondary"}>
@@ -169,7 +120,9 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl font-bold mb-2 text-balance">{vehicleTitle}</h1>
-              <div className="text-4xl font-bold text-primary mb-4">{formatPrice(vehicle.price)}</div>
+              {typeof vehicle.price === "number" && (
+                <div className="text-4xl font-bold text-primary mb-4">{formatPrice(vehicle.price)}</div>
+              )}
               {vehicle.description && <p className="text-muted-foreground text-pretty">{vehicle.description}</p>}
             </div>
 
@@ -224,16 +177,17 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
                       <span className="text-sm">Doors: {vehicle.doors}</span>
                     </div>
                   )}
-                  {vehicle.previous_owners !== null && vehicle.previous_owners !== undefined && (
+                  {(vehicle as any).previous_owners != null && (
                     <div className="flex items-center space-x-2">
                       <Car className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Previous Owners: {vehicle.previous_owners}</span>
+                      <span className="text-sm">Previous Owners: {(vehicle as any).previous_owners}</span>
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
 
+            {/* DVLA */}
             {vehicle.dvla_registration_number && (
               <Card>
                 <CardHeader>
@@ -260,13 +214,13 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
                       <span className="text-sm text-muted-foreground">MOT Expiry:</span>
                       <p className="font-medium">{vehicle.dvla_mot_expiry_date || "N/A"}</p>
                     </div>
-                    {vehicle.dvla_engine_capacity && (
+                    {"dvla_engine_capacity" in vehicle && vehicle.dvla_engine_capacity && (
                       <div>
                         <span className="text-sm text-muted-foreground">Engine Capacity:</span>
                         <p className="font-medium">{vehicle.dvla_engine_capacity}cc</p>
                       </div>
                     )}
-                    {vehicle.dvla_euro_status && (
+                    {("dvla_euro_status" in vehicle) && vehicle.dvla_euro_status && (
                       <div>
                         <span className="text-sm text-muted-foreground">Euro Status:</span>
                         <p className="font-medium">{vehicle.dvla_euro_status}</p>
@@ -277,6 +231,7 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
               </Card>
             )}
 
+            {/* Condition */}
             {(vehicle.exterior_paintwork_condition ||
               vehicle.interior_condition ||
               vehicle.engine_condition ||
@@ -295,9 +250,7 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
                         <span className="text-sm text-muted-foreground">Exterior Paintwork:</span>
                         <div className="flex items-center gap-1">
                           {getConditionIcon(vehicle.exterior_paintwork_condition)}
-                          <span
-                            className={`font-medium capitalize ${getConditionColor(vehicle.exterior_paintwork_condition)}`}
-                          >
+                          <span className={`font-medium capitalize ${getConditionColor(vehicle.exterior_paintwork_condition)}`}>
                             {vehicle.exterior_paintwork_condition}
                           </span>
                         </div>
@@ -333,14 +286,14 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
                     )}
                   </div>
 
-                  {vehicle.presence_of_rust && vehicle.rust_locations && vehicle.rust_locations.length > 0 && (
+                  {vehicle.presence_of_rust && Array.isArray(vehicle.rust_locations) && vehicle.rust_locations.length > 0 && (
                     <div className="border-t pt-4">
                       <div className="flex items-center gap-2 mb-2">
                         <AlertTriangle className="h-4 w-4 text-yellow-600" />
                         <span className="text-sm font-medium text-yellow-600">Rust Present</span>
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {vehicle.rust_locations.map((location, index) => (
+                        {vehicle.rust_locations.map((location: string, index: number) => (
                           <Badge key={index} variant="outline" className="text-xs border-yellow-300 text-yellow-700">
                             {location}
                           </Badge>
@@ -372,14 +325,14 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
             )}
 
             {/* Features */}
-            {vehicle.features && vehicle.features.length > 0 && (
+            {Array.isArray(vehicle.features) && vehicle.features.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle>Features & Equipment</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {vehicle.features.map((feature, index) => (
+                    {vehicle.features.map((feature: string, index: number) => (
                       <div key={index} className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-primary rounded-full" />
                         <span className="text-sm">{feature}</span>
