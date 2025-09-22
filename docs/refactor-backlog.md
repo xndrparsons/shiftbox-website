@@ -28,3 +28,31 @@
    - ✅ Current: shells (`(site)` + `(admin)`) in place.  
    - 📌 Later: add `sitemap.ts`, `robots.txt`, and filterable listings (faceted search).  
 
+
+## 🔧 Shiftbox Refactor / Cleanup Backlog (after shells & slug work)
+- Extract formatting helpers from vehicle detail page into /lib/utils.
+- Audit other pages to use RPCs/views instead of raw table reads.
+- Generate Supabase TS types into @shiftbox/db and replace ad-hoc interfaces.
+- Add generateMetadata to homepage, services, blog for consistent SEO.
+- Centralise <VehicleImage/> with blur/fallback + storage integration.
+- Split DVLA/Condition sections into components for reuse.
+- Add sitemap.ts and robots.ts to website.
+- Convert any remaining pages to (site) shell and wire real Header/Footer.
+- Tighten website (admin) middleware once auth is in place.
+
+## SEO & Robots (staging safeguards added)
+- [x] Add robots.ts to block non-prod and allow prod; disallow /(admin) and /api in prod.
+- [x] Add X-Robots-Tag noindex,nofollow header via middleware on non-prod (defense in depth).
+- [ ] Build dynamic sitemap.ts from Supabase (vehicles slugs, services, blog).
+- [ ] Add schema.org/Vehicle JSON-LD on vehicle detail pages.
+- [ ] Add dynamic OG images for vehicles (optional).
+- [ ] Review canonical URLs before launch.
+
+
+## Vehicles listing filters
+- [x] Add VehicleFilters UI with debounced model search and price slider.
+- [x] Wire searchParams → RPC on server page; clean query params.
+- [ ] Extend list_public_sales RPC to accept make/model/fuel/trans/price params and return total count for pagination.
+- [ ] Replace inline card with <VehicleCard/> and add skeleton/empty states.
+- [ ] Add pagination component using total count and page size.
+
