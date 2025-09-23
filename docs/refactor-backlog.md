@@ -103,3 +103,18 @@
 - [ ] Public: use curated RPCs/views; never expose raw external tables to anon.
 ## Blog (optional)
 - [ ] Reintroduce /blog using MDX or a CMS later; no DB client in server components unless needed.
+### Clean DVLA + CCD rebuild (ingestion & caching)
+- DVLA VES:
+  - Server action or /api endpoint: fetch by VRM, upsert to external.dvla_ves_data.
+  - Idempotent upsert, dedupe by registration, store fetched_at.
+- DVLA MOT History (OAuth2 client-credentials):
+  - Token fetch + cache server-side; error handling & retry.
+  - Fetch by VRM/VIN, upsert to dvla_mot_latest + dvla_mot_tests/test_defects.
+- CCD (paid):
+  - Single typed module lib/ccd.ts wrapping endpoints with rate limiting & per-table caching.
+  - Only call a CCD table if missing or stale; upsert to external.ccd_* snapshots.
+- Admin UI:
+  - On vehicle form: “Fetch DVLA VES / MOT / CCD” buttons.
+  - Show last fetched timestamps, success/error states, and selective refresh.
+- Website exposure:
+  - Only via curated RPCs/views (e.g., public.list_public_sales, public.get_public_vehicle); never expose raw external tables to anon.
