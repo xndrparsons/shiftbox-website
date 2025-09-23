@@ -71,3 +71,27 @@
 - [x] Standardise Next.js path alias: "@/..." -> "src/*" in apps/website.
 - [ ] Audit all imports to prefer default/consistent exports and real paths (avoid ad-hoc re-exports).
 - [ ] Add ESLint rule to flag unresolved aliases early.
+
+## Auth/DB helpers
+- [x] Add local server Supabase helper at apps/website/src/lib/supabase/server.ts
+- [ ] Extract shared helpers to packages/auth once both apps stabilise
+- [ ] Add client helper at src/lib/supabase/client.ts for client components
+
+## Vehicle detail page
+- [x] Add SECURITY DEFINER RPC get_public_vehicle(uuid)
+- [x] Details page uses RPC (no direct table read)
+- [ ] Optional: add MOT history RPC (tests + defects) and render timeline
+
+## Website cleanups / next steps
+- [ ] Replace debug page with proper listings grid + filters UI
+- [ ] Add pagination component to /vehicles
+- [ ] Create slug field and route (/vehicles/[slug]) with redirect from id
+- [ ] MOT history ingest + timeline on details page
+- [ ] Public image gallery for vehicles
+- [ ] SEO metadata per route; sitemap
+
+## Security posture
+- [x] Catalogue RPCs use SECURITY DEFINER
+- [ ] Consider anon RLS policy for 'available' listings (alternative approach)
+- [ ] Add tests: anon can call RPCs but cannot SELECT base tables
+

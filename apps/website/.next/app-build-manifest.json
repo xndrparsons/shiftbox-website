@@ -9,7 +9,6 @@
     "/(site)/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/(site)/layout.css",
       "static/chunks/app/(site)/layout.js"
     ],
     "/(site)/page": [
@@ -17,10 +16,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(site)/page.js"
     ],
-    "/_not-found/page": [
+    "/(site)/vehicles/loading": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/chunks/app/(site)/vehicles/loading.js"
+    ],
+    "/(site)/vehicles/[slug]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(site)/vehicles/[slug]/page.js"
+    ],
+    "/(site)/vehicles/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(site)/vehicles/page.js"
     ]
   }
 }

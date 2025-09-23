@@ -1,74 +1,102 @@
-import VehicleFilters from "@/components/business/VehicleFilters"
-import { supabaseServer } from "@shiftbox/auth/supabase.server"
 import Link from "next/link"
+import { supabaseServer } from "@/lib/supabase/server"
 
-// Revalidate listings periodically
+// Revalidate periodically (adjust as needed)
 export const revalidate = 60
 
-// Map search params to RPC params (shape your RPC expects)
-function parseFilters(sp: Record<string, string | string[] | undefined>) {
+type Search = Record<string, string | string[] | undefined>
+
+function parseFilters(sp: Search) {
   const get = (k: string) => (Array.isArray(sp[k]) ? sp[k]?.[0] : sp[k]) ?? null
   const make = get("make")
   const model = get("model")
   const fuel = get("fuel")
   const trans = get("trans")
-  const minPrice = get("minPrice") ? Number(get("minPrice")) : null
-  const maxPrice = get("maxPrice") ? Number(get("maxPrice")) : null
-  const page = get("page") ? Math.max(1, Number(get("page"))) : 1
-  const pageSize = 12
-  const offset = (page - 1) * pageSize
-
-  return { make, model, fuel, trans, minPrice, maxPrice, limit: pageSize, offset }
+  const min = get("min")
+  const max = get("max")
+  const page = Number(get("page") ?? 1)
+  const limit = 12
+  const offset = (page - 1) * limit
+  const p_min_price = min ? Number(min) : null
+  const p_max_price = max ? Number(max) : null
+  return { make, model, fuel, trans, limit, offset, p_min_price, p_max_price }
 }
 
-export default async function VehiclesPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
-  const supabase = supabaseServer()
-  const { make, model, fuel, trans, minPrice, maxPrice, limit, offset } = parseFilters(searchParams)
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string>>
+}) {
+  // Next 15: searchParams is async
+  const spObj = await searchParams
+  const filters = parseFilters(spObj)
 
-  // Call your RPC. Adjust parameter names to match your SQL function.
+  // Get Supabase (server) and guard for missing envs in dev
+  const supabase = await supabaseServer()
+  if (!supabase) {
+    return (
+      <main className="container mx-auto px-4 py-12">
+        <h1 className="text-2xl font-semibold mb-4">Shiftbox Vehicles</h1>
+        <p className="text-sm text-muted-foreground">
+          Supabase environment variables are missing. Set{" "}
+          <code>NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+          <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> in <code>apps/website/.env.local</code>.
+        </p>
+      </main>
+    )
+  }
+
+  // Call your RPC (matches SQL function signature)
   const { data, error } = await supabase.rpc("list_public_sales", {
-    p_limit: limit,
-    p_offset: offset,
-    p_make: make,
-    p_model: model,
-    p_fuel: fuel,
-    p_trans: trans,
-    p_min_price: minPrice,
-    p_max_price: maxPrice,
+    p_make: filters.make,
+    p_model: filters.model,
+    p_fuel: filters.fuel,
+    p_trans: filters.trans,
+    p_min_price: filters.p_min_price,
+    p_max_price: filters.p_max_price,
+    p_limit: filters.limit,
+    p_offset: filters.offset,
   })
 
-  if (error) throw error
-  const vehicles = data ?? []
-
-  // Optionally fetch available makes for the filter Select
-  const { data: makeRows } = await supabase.from("vehicles").select("make").eq("published", true).not("make", "is", null).order("make", { ascending: true })
-  const makes = Array.from(new Set((makeRows ?? []).map((r) => r.make))).filter(Boolean) as string[]
+  if (error) {
+    return (
+      <main className="container mx-auto px-4 py-12">
+        <h1 className="text-2xl font-semibold mb-4">Shiftbox Vehicles</h1>
+        <pre className="text-sm text-red-600">{JSON.stringify(error, null, 2)}</pre>
+      </main>
+    )
+  }
 
   return (
-    <main className="container mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-3xl font-semibold">Vehicles</h1>
-
-      <VehicleFilters makes={makes} minPrice={0} maxPrice={50000} />
-
-      <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {vehicles.map((v: any) => (
-          <article key={v.id} className="rounded-lg border overflow-hidden">
-            <Link href={`/vehicles/${v.slug}`}>
-              {/* Replace with your VehicleCard when ready */}
-              <div className="aspect-[4/3] bg-muted" />
-              <div className="p-4">
-                <div className="font-medium">{v.make} {v.model}</div>
-                {"price_gbp" in v && typeof v.price_gbp === "number" && (
-                  <div className="text-primary font-semibold">£{v.price_gbp.toLocaleString()}</div>
-                )}
-                {v.registration && <div className="text-sm text-muted-foreground">{v.registration}</div>}
+    <main className="container mx-auto px-4 py-12 space-y-6">
+      <h1 className="text-2xl font-semibold">Shiftbox Vehicles</h1>
+      {(!data || data.length === 0) ? (
+        <p className="text-sm text-muted-foreground">No vehicles found.</p>
+      ) : (
+        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {data.map((v: any) => (
+            <li key={v.id} className="rounded-lg border p-4">
+              <div className="flex items-baseline justify-between">
+                <h2 className="font-medium">{v.make} {v.model}</h2>
+                {typeof v.price === "number" || (typeof v.price === "string" && v.price) ? (
+                  <span className="text-primary font-semibold">
+                    £{Number(v.price).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                  </span>
+                ) : null}
               </div>
-            </Link>
-          </article>
-        ))}
-      </section>
-
-      {/* TODO: pagination controls (Next/Prev) once count is available */}
+              <div className="text-sm text-muted-foreground">
+                {v.year ?? "—"} • {v.mileage ? `${v.mileage.toLocaleString()} mi` : "—"} • {v.fuel_type ?? "—"}
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                {v.dvla_colour ? `Colour: ${v.dvla_colour}` : null}
+              </div>
+              <div className="mt-3">
+                <Link href={`/vehicles/${v.id}`} className="text-sm underline">View details</Link>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   )
 }
