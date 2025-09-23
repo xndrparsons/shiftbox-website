@@ -95,3 +95,11 @@
 - [ ] Consider anon RLS policy for 'available' listings (alternative approach)
 - [ ] Add tests: anon can call RPCs but cannot SELECT base tables
 
+## Vehicle data ingestion / lookups (clean rebuild)
+- [ ] DVLA VES integration: server action or API route that fetches by VRM, upserts to `external.dvla_ves_data`.
+- [ ] DVLA MOT History (OAuth2 client credentials): token fetch, store token cache server-side, fetch by VRM/VIN, upsert to `external.dvla_mot_*`.
+- [ ] CCD (paid): normalized module `lib/ccd.ts` wrapping all 8 endpoints with rate limiting + caching; only call missing datasets.
+- [ ] Admin UI: "Lookup DVLA / MOT / CCD" buttons on vehicle form; show fetched data; only re-call if stale.
+- [ ] Public: use curated RPCs/views; never expose raw external tables to anon.
+## Blog (optional)
+- [ ] Reintroduce /blog using MDX or a CMS later; no DB client in server components unless needed.
