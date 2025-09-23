@@ -16,5 +16,10 @@
     "@types/node": "^22.18.4",
     "typescript": "^5.9.2"
   },
-  "packageManager": "pnpm@10.17.1"
+  "packageManager": "pnpm@10.17.1",
+  "pnpm": {
+    "allowedScripts": {
+      "@tailwindcss/oxide": true
+    }
+  }
 }
