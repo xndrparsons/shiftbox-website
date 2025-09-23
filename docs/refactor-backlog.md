@@ -56,3 +56,13 @@
 - [ ] Replace inline card with <VehicleCard/> and add skeleton/empty states.
 - [ ] Add pagination component using total count and page size.
 
+
+## Roles hardening
+- [x] Temporary: treat any authenticated session as admin for website (admin) access.
+- [ ] Add `public.user_profiles` with role enum and RLS.
+- [ ] Update Header + middleware to use roles: owner/admin only see admin/app links.
+- [ ] Add server action to promote/demote roles (owner only).
+
+## Middleware hygiene
+- [x] Merge website non-prod noindex and (admin) session-protect into one middleware.
+- [ ] When roles land, update website middleware to require role ∈ {owner,admin} for /(admin) routes.
