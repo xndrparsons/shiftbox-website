@@ -1,12 +1,19 @@
 {
   "name": "shiftbox",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev:website": "pnpm --filter @shiftbox/website dev",
     "build:website": "pnpm --filter @shiftbox/website build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "fmt": "pnpm -r format"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.4",
+    "typescript": "^5.9.2"
   }
 }

@@ -66,3 +66,8 @@
 ## Middleware hygiene
 - [x] Merge website non-prod noindex and (admin) session-protect into one middleware.
 - [ ] When roles land, update website middleware to require role ∈ {owner,admin} for /(admin) routes.
+
+## Aliases & exports
+- [x] Standardise Next.js path alias: "@/..." -> "src/*" in apps/website.
+- [ ] Audit all imports to prefer default/consistent exports and real paths (avoid ad-hoc re-exports).
+- [ ] Add ESLint rule to flag unresolved aliases early.
