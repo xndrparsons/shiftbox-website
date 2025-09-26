@@ -1,0 +1,8 @@
+{
+  "projects": [
+    {
+      "name": "shiftbox-website",
+      "rootDirectory": "apps/website"
+    }
+  ]
+}
