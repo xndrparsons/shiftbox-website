@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+/* Optional: make 'dark' class a global variant */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Define semantic tokens so utilities like bg-background/text-foreground work */
+@theme {
+  /* Colors (semantic) */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+
+  /* Fonts (semantic utilities: font-logo, font-heading, font-body, font-mono) */
+  --font-logo: var(--font-sixtyfour);
+  --font-heading: var(--font-bebas);
+  --font-body: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Default (dark) theme tokens */
+:root {
+  /* HSL values only; Tailwind v4 will plug these into hsl() above */
+  --background: 222 47% 7%;   /* near-zinc-900 */
+  --foreground: 210 40% 98%;  /* near-zinc-50  */
+  --border: 217 32% 17%;
+}
+
+/* If you later want to support light mode, add a .light scope and swap tokens */
+.dark { color-scheme: dark; }
