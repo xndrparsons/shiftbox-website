@@ -1,4 +1,11 @@
-// @ts-nocheck
+export async function submit(formData: FormData) { "use server";
+  // TODO: validate and handle (send email, store row, etc.)
+  const name = formData.get("name");
+  const email = formData.get("email");
+  const message = formData.get("message");
+  // no-op for now
+}
+
 import { Suspense } from "react"
 import { submitContact } from "./actions"
 import { Button } from "@/components/ui/button"
@@ -16,7 +23,7 @@ function ContactForm() {
   const rf = typeof document !== "undefined" ? document.referrer : ""
 
   return (
-    <form action={submitContact} className="space-y-4 max-w-xl">
+    <form action={submit} className="space-y-4 max-w-xl">
       {/* honeypot field (hidden) */}
       <input type="text" name="company" className="hidden" tabIndex={-1} autoComplete="off" />
 
@@ -90,7 +97,6 @@ export default async function ContactPage({
             </div>
           ) : (
             <Suspense fallback={<div className="h-40 rounded-md border animate-pulse" />}>
-              {/* @ts-expect-error Async Server Component boundary */}
               <ContactForm />
             </Suspense>
           )}
