@@ -1,4 +1,15 @@
 import type { Config } from "tailwindcss"
-import preset from "@shiftbox/config/tailwind-preset"
-const config: Config = { presets: [preset], content: ["./src/**/*.{ts,tsx}"] }
-export default config
+
+export default {
+  content: [
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [
+    require("tailwindcss-animate")
+  ]
+} satisfies Config

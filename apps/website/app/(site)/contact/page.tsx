@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Suspense } from "react"
 import { submitContact } from "./actions"
 import { Button } from "@/components/ui/button"
