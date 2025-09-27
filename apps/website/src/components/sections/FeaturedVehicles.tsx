@@ -1,25 +1,73 @@
-import VehicleCard from "@/components/business/VehicleCard"
+// apps/website/src/components/sections/FeaturedVehicles.tsx
+import Link from "next/link"
 
-type Props = {
-  vehicles: Array<{
-    id: string; slug?: string | null; make: string; model: string; year: number | null
-    price: number | null; mileage: number | null; lead_image_url?: string | null; status_code?: string | null
-  }>
+type Vehicle = {
+  id: string
+  make: string | null
+  model: string | null
+  year: number | null
+  price: number | string | null
+  mileage: number | null
+  fuel_type: string | null
+  dvla_colour?: string | null
 }
 
-export default function FeaturedVehicles({ vehicles }: Props) {
-  if (!vehicles?.length) return null
+export default function FeaturedVehicles({ vehicles }: { vehicles: Vehicle[] }) {
   return (
-    <section className="py-12">
-      <div className="container mx-auto px-4">
-        <div className="flex items-end justify-between mb-6">
-          <h2 className="text-2xl font-semibold">Featured Vehicles</h2>
-          <a href="/vehicles" className="text-sm underline">View all</a>
+    <section className="space-y-4">
+      <div className="flex items-end justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold">Featured vehicles</h2>
+          <p className="text-sm text-muted-foreground">
+            Hand-picked stock currently available.
+          </p>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {vehicles.slice(0, 3).map((v) => <VehicleCard key={v.id} v={v} />)}
-        </div>
+        <Link href="/vehicles" className="text-sm underline">
+          View all
+        </Link>
       </div>
+
+      {(!vehicles || vehicles.length === 0) ? (
+        <div className="rounded-lg border p-6 text-sm text-muted-foreground">
+          No featured vehicles yet. Check back soon.
+        </div>
+      ) : (
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {vehicles.map((v) => {
+            const title = [v.make, v.model].filter(Boolean).join(" ")
+            const priceNum =
+              typeof v.price === "string" ? Number(v.price) : v.price ?? null
+            const price = priceNum != null
+              ? `£${priceNum.toLocaleString("en-GB", { maximumFractionDigits: 0 })}`
+              : "—"
+
+            return (
+              <li key={v.id} className="rounded-lg border p-4">
+                <div className="flex items-baseline justify-between">
+                  <h3 className="font-medium">{title || "Vehicle"}</h3>
+                  <span className="text-primary font-semibold">{price}</span>
+                </div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  {[v.year ?? "—",
+                    v.mileage ? `${v.mileage.toLocaleString()} mi` : "—",
+                    v.fuel_type ?? "—"]
+                    .join(" • ")}
+                </div>
+                {v.dvla_colour && (
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    Colour: {v.dvla_colour}
+                  </div>
+                )}
+                <div className="mt-3">
+                  <Link href={`/vehicles/${v.id}`} className="text-sm underline">
+                    View details
+                  </Link>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
     </section>
   )
 }
