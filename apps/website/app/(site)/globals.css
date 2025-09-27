@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@layer base {
+  :root { --radius: 0.5rem; }
+  html, body { height: 100%; }
+  body { @apply bg-background text-foreground font-body antialiased; }
+}
+
+@layer utilities {
+  .container { max-width: 1200px; }
+}
