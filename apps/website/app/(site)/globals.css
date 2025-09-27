@@ -1,11 +1,20 @@
 @import "tailwindcss";
 
-@layer base {
-  :root { --radius: 0.5rem; }
-  html, body { height: 100%; }
-  body { @apply bg-background text-foreground font-body antialiased; }
+@theme {
+  --radius: 0.75rem;
 }
 
-@layer utilities {
-  .container { max-width: 1200px; }
+:root {
+  color-scheme: dark;
 }
+
+html, body {
+  @apply min-h-dvh bg-background text-foreground antialiased;
+}
+
+.container {
+  @apply max-w-7xl;
+}
+
+/* force logo font fallback */
+.font-logo{font-family:var(--font-sixtyfour),var(--font-geist-sans),system-ui,sans-serif}

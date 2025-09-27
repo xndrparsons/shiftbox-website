@@ -1,13 +1,26 @@
 import "./globals.css"
-import ThemeProvider from "@/components/providers/theme-provider"
+import type { Metadata } from "next"
+import { Sixtyfour, Bebas_Neue } from "next/font/google"
+import { GeistSans } from "geist/font/sans"
+import { GeistMono } from "geist/font/mono"
+
+export const metadata: Metadata = {
+  title: "Shiftbox",
+  description: "Performance. Precision. Trust.",
+}
+
+const sixtyfour = Sixtyfour({ subsets: ["latin"], weight: "400", variable: "--font-sixtyfour", display: "swap" })
+const bebas = Bebas_Neue({ weight: "400", subsets: ["latin"], variable: "--font-bebas", display: "swap" })
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${sixtyfour.variable} ${bebas.variable} ${GeistSans.variable} ${GeistMono.variable}`}
+    >
+      <body className="min-h-dvh bg-background text-foreground font-body antialiased">
+        {children}
       </body>
     </html>
   )

@@ -1,43 +1,43 @@
+"use client"
+
 type Vehicle = {
   id: string
   slug?: string | null
-  make: string
-  model: string
-  year: number | null
-  price: number | null
-  mileage: number | null
-  lead_image_url?: string | null
-  status_code?: string | null
+  make?: string | null
+  model?: string | null
+  year?: number | null
+  price?: number | string | null
+  mileage?: number | null
+  fuel_type?: string | null
+  dvla_colour?: string | null
+  images?: string[] | null
 }
 
-export default function VehicleCard({ v }: { v: Vehicle }) {
+export default function VehicleCard({ v }: { v?: Vehicle }) {
+  if (!v) return null
+
   const href = v.slug ? `/vehicles/${v.slug}` : `/vehicles/${v.id}`
-  const price = typeof v.price === "number" ? `£${Math.round(v.price).toLocaleString("en-GB")}` : "POA"
+
+  const priceNum =
+    typeof v.price === "string" ? Number(v.price) : typeof v.price === "number" ? v.price : null
+  const price =
+    priceNum !== null && !Number.isNaN(priceNum)
+      ? `£${Math.round(priceNum).toLocaleString("en-GB")}`
+      : "POA"
+
+  const title = [v.make, v.model].filter(Boolean).join(" ") || "Vehicle"
+  const subtitle = [v.year ?? "—", v.mileage ? `${v.mileage.toLocaleString()} mi` : "—", v.fuel_type ?? "—"]
+    .filter(Boolean)
+    .join(" • ")
 
   return (
-    <a href={href} className="group rounded-xl border overflow-hidden hover:shadow-sm transition">
-      <div className="aspect-[4/3] bg-muted overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          alt={`${v.make} ${v.model}`}
-          src={v.lead_image_url ?? "/placeholder.svg?height=400&width=600"}
-          className="w-full h-full object-cover group-hover:scale-[1.02] transition"
-        />
+    <a href={href} className="block rounded-lg border p-4 hover:shadow-md transition-shadow">
+      <div className="flex items-baseline justify-between">
+        <h3 className="font-medium">{title}</h3>
+        <span className="text-primary font-semibold">{price}</span>
       </div>
-      <div className="p-4 space-y-1">
-        <div className="flex items-center justify-between">
-          <div className="font-medium">{v.make} {v.model}{v.year ? ` · ${v.year}` : ""}</div>
-          <div className="text-primary font-semibold">{price}</div>
-        </div>
-        {typeof v.mileage === "number" && (
-          <div className="text-xs text-muted-foreground">{v.mileage.toLocaleString()} miles</div>
-        )}
-        {v.status_code && (
-          <div className="mt-2 inline-flex text-[10px] rounded-full border px-2 py-0.5 uppercase tracking-wide">
-            {v.status_code}
-          </div>
-        )}
-      </div>
+      <div className="text-sm text-muted-foreground">{subtitle}</div>
+      {v.dvla_colour && <div className="mt-2 text-xs text-muted-foreground">Colour: {v.dvla_colour}</div>}
     </a>
   )
 }
