@@ -1,14 +1,26 @@
-import Header from "@/components/layout/Header"
-import Footer from "@/components/layout/Footer"
+import "./globals.css"
+import type { Metadata } from "next"
+import { Sixtyfour, Bebas_Neue } from "next/font/google"
+import { GeistSans } from "geist/font/sans"
+import { GeistMono } from "geist/font/mono"
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+const sixtyfour = Sixtyfour({ subsets: ["latin"], weight: "400", variable: "--font-sixtyfour", display: "swap" })
+const bebas = Bebas_Neue({ weight: "400", subsets: ["latin"], variable: "--font-bebas", display: "swap" })
+
+export const metadata: Metadata = {
+  title: "Shiftbox",
+  description: "Performance. Precision. Trust.",
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <Header />
-      <main className="container mx-auto px-4 py-12">
+    <html
+      lang="en"
+      className={`${sixtyfour.variable} ${bebas.variable} ${GeistSans.variable} ${GeistMono.variable}`}
+    >
+      <body className="min-h-dvh bg-background text-foreground font-body antialiased">
         {children}
-      </main>
-      <Footer />
-    </>
+      </body>
+    </html>
   )
 }
