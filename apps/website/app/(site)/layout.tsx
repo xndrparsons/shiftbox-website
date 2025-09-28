@@ -1,9 +1,13 @@
-import type { Metadata } from "next"
+import type { ReactNode } from "react"
+import Header from "@/components/layout/Header"
+import Footer from "@/components/layout/Footer"
 
-export const metadata: Metadata = {
-  title: "Shiftbox",
-}
-
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+export default function SiteLayout({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <Header />
+      {children}
+      <Footer />
+    </>
+  )
 }

@@ -16,89 +16,26 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Dark defaults */
+/* Default theme: MIAMI */
 :root[data-theme="miami"] {
   --background: 222 47% 7%;
   --foreground: 210 40% 98%;
   --border: 217 32% 17%;
 }
 
+/* Dark flag for UA color-scheme */
 .dark { color-scheme: dark; }
 
-/* Base resets and defaults */
+/* Base + tokens */
 * { border-color: var(--color-border); }
 html, body { min-height: 100dvh; }
 body { background: var(--color-background); color: var(--color-foreground); }
 
-/* === Logo gradient defaults & presets === */
+/* Logo gradient (Miami) */
 :root {
-  /* Default: retro magenta→cyan vibe */
-  --logo-from: hsl(300 85% 65%);
-  --logo-to:   hsl(195 95% 60%);
-}
-
-
-/* === Theme variants (overrides) === */
-:root { --logo-gradient: linear-gradient(180deg,#FFFFFF 0%,#FFFFFF80 100%); }
-
-:root[data-theme="miami"] {
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
-  --border: 217 32% 17%;
   --logo-gradient: linear-gradient(180deg,#00E5FF 0%,#7C4DFF 55%,#FF4D9D 100%);
 }
 
-:root[data-theme="sunset"] {
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
-  --border: 217 32% 17%;
-  --logo-gradient: linear-gradient(180deg,#FFC107 0%,#FF6D00 50%,#D500F9 100%);
-}
-
-:root[data-theme="cyber"] {
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
-  --border: 217 32% 17%;
-  --logo-gradient: linear-gradient(180deg,#B2FFF6 0%,#00E5FF 55%,#00BFA5 100%);
-}
-
-:root[data-theme="lava"] {
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
-  --border: 217 32% 17%;
-  --logo-gradient: linear-gradient(180deg,#FFF176 0%,#FF9100 50%,#FF3D00 100%);
-}
-
-/* === Additional retro / neon themes === */
-:root[data-theme="retro-cyan"] {
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
-  --border: 217 32% 17%;
-  --logo-gradient: linear-gradient(180deg, hsl(190 95% 60%) 0%, hsl(160 90% 55%) 100%);
-}
-
-:root[data-theme="retro-magenta"] {
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
-  --border: 217 32% 17%;
-  --logo-gradient: linear-gradient(180deg, hsl(305 85% 64%) 0%, hsl(200 95% 60%) 100%);
-}
-
-:root[data-theme="neon-sunset"] {
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
-  --border: 217 32% 17%;
-  --logo-gradient: linear-gradient(180deg, #ff7a18 0%, #af002d 100%);
-}
-
-:root[data-theme="electric-purple"] {
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
-  --border: 217 32% 17%;
-  --logo-gradient: linear-gradient(180deg, hsl(265 95% 65%) 0%, hsl(200 95% 60%) 100%);
-}
-
-/* Logo text always pulls from current theme’s gradient */
 .logo-text{
   background-image: var(--logo-gradient);
   -webkit-background-clip: text;
