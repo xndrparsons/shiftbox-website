@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`dark ${sixtyfour.variable} ${bebas.variable} ${GeistSans.variable} ${GeistMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-dvh bg-background text-foreground font-body antialiased">
+      <body className="min-h-dvh bg-background text-foreground font-body antialiased bg-site">
         {children}
       </body>
     </html>

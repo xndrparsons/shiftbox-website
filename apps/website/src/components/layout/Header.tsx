@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import CarIcon from "@/components/branding/CarIcon"
 import { usePathname } from "next/navigation"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
@@ -36,6 +37,10 @@ export default function Header() {
 
           {/* Single Link around presentational Logo */}
           <Link href="/" aria-label="Shiftbox home" className="inline-flex items-center">
+            <span className="relative inline-flex items-center md:static">
+      {/* Mobile-only “speed lines” behind the car */}
+      <CarIcon className="relative z-10 h-5 w-auto text-foreground/70 md:h-6 [filter:drop-shadow(0_0_4px_rgba(255,255,255,.08))]" />
+    </span>
             <Logo className="text-lg md:text-xl leading-none" />
           </Link>
         </div>
@@ -72,7 +77,7 @@ function MobileMenu() {
             <span className="h-px w-5 bg-foreground/60" />
             <span className="h-px w-5 bg-foreground/60" />
           </span>
-          <span className="relative text-[13px] leading-none text-foreground/80">◁</span>
+          
         </button>
       </SheetTrigger>
       <SheetContent

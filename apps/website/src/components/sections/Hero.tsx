@@ -1,49 +1,59 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Hero() {
   return (
-    <section className="relative w-full overflow-hidden">
-      {/* Background: image (optional) + radial + vignette */}
-      <div
-        className="absolute inset-0 -z-10"
-        style={{
-          backgroundImage: `linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background)) 20%, transparent 60%),
-                            radial-gradient(80% 100% at 10% 0%, rgba(124,77,255,.15) 0%, transparent 60%),
-                            radial-gradient(70% 90% at 90% 10%, rgba(0,229,255,.12) 0%, transparent 60%)`,
-          backgroundColor: "hsl(var(--background))",
-        }}
-      />
-      {/* Optional hero image – place /hero.jpg to enable */}
-      <div
-        className="absolute inset-0 -z-20 bg-center bg-cover opacity-[.18]"
-        style={{ backgroundImage: "url('/hero.jpg')" }}
-        aria-hidden="true"
-      />
-      <div className="container mx-auto px-4 py-16 md:py-24 lg:py-28">
-        <div className="max-w-3xl">
-          <h1 className="font-heading tracking-tight leading-[0.9] text-5xl sm:text-6xl md:text-7xl text-foreground">
-            <span className="block">Quality Cars</span>
-            <span className="block">
-              &nbsp;<span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--logo-gradient)" }}>Expert</span>
-              &nbsp;Service
-            </span>
-          </h1>
-          <p className="mt-6 text-lg md:text-xl text-foreground/70 max-w-2xl">
-            Independent garage near Kendal. Straightforward cars, transparent work, pro detailing.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="px-5">
-              <Link href="/vehicles">Browse Vehicles →</Link>
+    <section className="relative overflow-hidden dark:text-shadow-md/100">
+      {/* Brighter background image (no dark overlay) */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-[url('/hero.jpg')] bg-cover bg-center opacity-80" />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 py-24 md:py-32 lg:py-40 text-center">
+        {/* Revert to simpler headline (no custom tracking/leading), keep gradient on EXPERT */}
+        <h1 className="font-heading text-white text-4xl md:text-5xl lg:text-6xl">
+          QUALITY CARS{"  "}
+          <span className="whitespace-nowrap text-white/50">&amp; </span>
+          <span className="block md:inline text-transparent bg-clip-text dark:text-shadow-none
+                           bg-[linear-gradient(180deg,#00E5FF_0%,#7C4DFF_55%,#FF4D9D_100%)]">
+            EXPERT
+          </span>{"  "}
+          <span>SERVICE</span>
+        </h1>
+
+        <p className="mt-4 max-w-4xl mx-auto text-md md:text-lg text-white/70">
+          Meticulously selected cars, precision servicing, and honest guidance.
+        </p>
+
+        <p className="mt-2 max-w-4xl mx-auto text-lg md:text-xl text-white/85">
+          Built for drivers who care.
+        </p>
+
+        <div className="mt-8 flex flex-wrap justify-center gap-4">
+          <Link href="/vehicles" className="group">
+            <Button
+              className="h-12 px-6 rounded-xl bg-white/10 hover:text-purple-400 hover:bg-white/15 text-white
+                         border border-white/10 backdrop-blur transition"
+            >
+              BROWSE VEHICLES
+              <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-0.5" />
             </Button>
-            <Button asChild size="lg" variant="outline" className="px-5">
-              <Link href="/contact">Contact Us</Link>
+          </Link>
+
+          <Link href="/contact">
+            <Button
+              className="h-12 px-6 rounded-xl bg-white/10 hover:text-purple-400 hover:bg-white/15 text-white/90
+                         border border-white/10 backdrop-blur"
+              variant={undefined as any}
+            >
+              CONTACT US
             </Button>
-          </div>
+          </Link>
         </div>
       </div>
     </section>
-  )
+  );
 }

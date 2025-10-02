@@ -1,3 +1,4 @@
+import { submitContact } from "./actions";
 import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
  * - Single param (FormData)
  * - Returns Promise<void> to satisfy React's action typing
  */
-export async function submitContact(formData: FormData): Promise<void> {
+async function _submitContactLocal(formData: FormData): Promise<void> {
   "use server"
   // Extract fields
   const name = (formData.get("name") || "").toString().trim()

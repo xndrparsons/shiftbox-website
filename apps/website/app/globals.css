@@ -28,7 +28,11 @@
 
 /* Base + tokens */
 * { border-color: var(--color-border); }
-html, body { min-height: 100dvh; }
+html, body {
+  background-color: oklch(15.6% .004 285.882);
+  color: oklch(97% .02 255);
+  background-image: radial-gradient(80vw 60vh at 50% 30%, color-mix(in oklch, oklch(15.6% .004 285.882) 94%, oklch(60% .12 290) 6%) 0%, oklch(15.6% .004 285.882) 70%);
+  background-attachment: fixed; min-height: 100dvh; }
 body { background: var(--color-background); color: var(--color-foreground); }
 
 /* Logo gradient (Miami) */
@@ -42,3 +46,6 @@ body { background: var(--color-background); color: var(--color-foreground); }
   background-clip: text;
   color: transparent;
 }
+
+/* Site gradient bg */
+.bg-site{background-color:oklch(15.6% .004 285.882);background-image:radial-gradient(80vw 60vh at 50% 30%,color-mix(in oklch, oklch(15.6% .004 285.882) 94%, oklch(60% .12 290) 6%) 0%, oklch(15.6% .004 285.882) 70%);background-attachment:fixed;}
