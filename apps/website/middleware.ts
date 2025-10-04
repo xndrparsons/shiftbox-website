@@ -1,28 +1,36 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { createServerClient } from "@supabase/ssr"
 
-export function middleware(req: NextRequest) {
-  const { pathname } = new URL(req.url)
-  const isProd = process.env.NODE_ENV === "production"
+const ADMIN_PREFIX = "/admin"
+
+export async function middleware(req: NextRequest) {
+  const { pathname, origin } = req.nextUrl
+  if (!pathname.startsWith(ADMIN_PREFIX)) return NextResponse.next()
 
   const res = NextResponse.next()
-  if (!isProd) {
-    res.headers.set("X-Robots-Tag", "noindex, nofollow")
-  }
-
-  if (pathname.startsWith("/(admin)")) {
-    const hasSession =
-      req.cookies.get("sb-access-token")?.value ||
-      req.cookies.get("supabase-auth-token")?.value
-
-    if (!hasSession) {
-      const login = new URL("/auth/login", req.url)
-      login.searchParams.set("next", pathname)
-      return NextResponse.redirect(login)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name) => req.cookies.get(name)?.value,
+        set: (name, value, options) => res.cookies.set({ name, value, ...options }),
+        remove: (name, options) => res.cookies.set({ name, value: "", ...options, maxAge: 0 }),
+      }
     }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    const url = new URL("/auth/login", origin)
+    url.searchParams.set("redirect", pathname)
+    return NextResponse.redirect(url)
   }
 
   return res
 }
 
-export const config = { matcher: ["/:path*"] }
+export const config = {
+  matcher: ["/admin/:path*"],
+}

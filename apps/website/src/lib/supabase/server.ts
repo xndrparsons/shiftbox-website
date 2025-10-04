@@ -1,38 +1,44 @@
-import { cookies } from "next/headers"
-import { createServerClient } from "@supabase/ssr"
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
-/**
- * Server-side Supabase client for RSC/route handlers.
- * Reads/writes auth cookies via Next's cookies() API.
- */
+// For React Server Components (pages/layouts/etc). Never mutates cookies.
 export async function supabaseServer() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!url || !anon) {
-    console.warn("⚠️ Supabase env vars missing: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY")
-    return null as any
-  }
-
-  const cookieStore = await cookies()
-
-  return createServerClient(url, anon, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value
+  const store = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return store.get(name)?.value;
+        },
+        // No-ops in RSC to avoid Next error:
+        // "Cookies can only be modified in a Server Action or Route Handler"
+        set() {},
+        remove() {},
       },
-      set(name: string, value: string, options: any) {
-        try {
-          // @ts-ignore
-          cookieStore.set({ name, value, ...options })
-        } catch { /* no-op in RSC */ }
+    }
+  );
+}
+
+// For Server Actions / Route Handlers (safe to mutate cookies).
+export async function supabaseAction() {
+  const store = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return store.get(name)?.value;
+        },
+        set(name: string, value: string, options: any) {
+          store.set(name, value, options);
+        },
+        remove(name: string, options: any) {
+          store.set(name, "", { ...options, maxAge: 0 });
+        },
       },
-      remove(name: string, options: any) {
-        try {
-          // @ts-ignore
-          cookieStore.set({ name, value: "", ...options, maxAge: 0 })
-        } catch { /* no-op in RSC */ }
-      },
-    },
-  })
+    }
+  );
 }
