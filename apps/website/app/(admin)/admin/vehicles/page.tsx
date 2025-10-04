@@ -36,9 +36,7 @@ export default async function AdminVehicles({
     <main className="container mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-heading">Vehicles</h1>
-        <Link href="/admin/vehicles/new" className="px-3 py-2 rounded bg-white/10 hover:bg-white/15 border">
-          Add Vehicle
-        </Link>
+        <VehicleDrawer />
       </div>
 
       <form className="flex flex-wrap items-center gap-3">
