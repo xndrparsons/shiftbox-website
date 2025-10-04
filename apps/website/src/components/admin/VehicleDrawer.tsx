@@ -6,7 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { createVehicle } from "@/app/(admin)/admin/vehicles/new/actions";
+import { createVehicle } from "../../../app/(admin)/admin/vehicles/actions";
 import { Loader2, Search } from "lucide-react";
 
 const NecessarySchema = z.object({
