@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shiftbox/ui/*": ["packages/ui/*"],
+      "@shiftbox/db/*": ["packages/db/*"],
+      "@shiftbox/auth/*": ["packages/auth/*"],
+      "@shiftbox/config/*": ["packages/config/*"]
+    }
+  }
+}

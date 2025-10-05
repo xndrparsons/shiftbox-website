@@ -1,0 +1,25 @@
+import "./globals.css"
+import type { Metadata } from "next"
+import { Sixtyfour, Bebas_Neue } from "next/font/google"
+import { GeistSans } from "geist/font/sans"
+import { GeistMono } from "geist/font/mono"
+
+const sixtyfour = Sixtyfour({ subsets: ["latin"], weight: "400", variable: "--font-sixtyfour", display: "swap" })
+const bebas = Bebas_Neue({ subsets: ["latin"], weight: "400", variable: "--font-bebas", display: "swap" })
+
+export const metadata: Metadata = { title: "Shiftbox", description: "Performance. Precision. Trust." }
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html
+      lang="en"
+      data-theme="miami"
+      className={`dark ${sixtyfour.variable} ${bebas.variable} ${GeistSans.variable} ${GeistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-dvh bg-background text-foreground font-body antialiased bg-site">
+        {children}
+      </body>
+    </html>
+  )
+}
