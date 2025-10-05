@@ -6,6 +6,7 @@ import { setPublished, deleteVehicle } from "./actions";
 
 export const dynamic = "force-dynamic";
 
+import VehicleDrawer from "@/components/admin/VehicleDrawer";
 export default async function AdminVehicles({
   searchParams,
 }: {

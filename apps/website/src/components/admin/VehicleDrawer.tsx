@@ -4,9 +4,16 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { createVehicle } from "../../../app/(admin)/admin/vehicles/actions";
+import { createVehicle } from "@/app/(admin)/admin/vehicles/actions";
 import { Loader2, Search } from "lucide-react";
 
 const NecessarySchema = z.object({
@@ -24,14 +31,13 @@ const NecessarySchema = z.object({
   colour: z.string().optional().nullable(),
   published: z.boolean().optional().default(false),
 });
-
 type Necessary = z.infer<typeof NecessarySchema>;
 
 export default function VehicleDrawer() {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const { register, setValue, getValues, formState } = useForm<Necessary>({
+  const { register, setValue, getValues } = useForm<Necessary>({
     resolver: zodResolver(NecessarySchema),
     defaultValues: {
       registration: "",
@@ -61,19 +67,31 @@ export default function VehicleDrawer() {
         body: JSON.stringify({ vrn }),
       });
       const json = await res.json();
-      if (json?.data) {
-        const d = json.data;
-        if (d.make) setValue("make", d.make);
-        if (d.model) setValue("model", d.model);
-        if (d.fuel_type) setValue("fuel_type", d.fuel_type);
-        if (d.engine_capacity != null) setValue("engine_capacity", d.engine_capacity);
-        if (d.co2_emissions != null) setValue("co2_emissions", d.co2_emissions);
-        if (d.body_type) setValue("body_type", d.body_type);
-        if (d.transmission) setValue("transmission", d.transmission);
-        if (d.colour) setValue("colour", d.colour);
-        if (d.year != null) setValue("year", d.year);
-      } else {
-        console.warn("Lookup response:", json);
+
+      if (!json?.ok) {
+        console.warn("Lookup failed:", json?.error || json);
+      }
+
+      // DVLA (VES)
+      const d = json?.dvla || {};
+      if (d.make) setValue("make", String(d.make).trim());
+      if (d.model) setValue("model", String(d.model).trim());
+      if (d.fuelType) setValue("fuel_type", String(d.fuelType).trim());
+      if (typeof d.engineCapacity === "number") setValue("engine_capacity", d.engineCapacity);
+      if (typeof d.co2Emissions === "number") setValue("co2_emissions", d.co2Emissions);
+      if (d.bodyType) setValue("body_type", String(d.bodyType).trim());
+      if (d.transmission) setValue("transmission", String(d.transmission).trim());
+      if (d.colour) setValue("colour", String(d.colour).trim());
+      if (d.yearOfManufacture) setValue("year", Number(d.yearOfManufacture));
+
+      // DVSA (MOT history)
+      const sDVSA = json?.dvsa;
+      if (sDVSA && !sDVSA.error) {
+        const entry = Array.isArray(sDVSA) ? sDVSA[0] : sDVSA;
+        if (entry?.motStatus) setValue("body_type" as any, getValues("body_type")); // no direct field; keep mapping stable
+        if (entry?.motExpiryDate) {
+          // If you later add fields for MOT, set them here (e.g. setValue("mot_expiry_date", entry.motExpiryDate))
+        }
       }
     } catch (e) {
       console.error("lookup failed:", e);
@@ -82,15 +100,18 @@ export default function VehicleDrawer() {
     }
   }
 
-  // NOTE: native form submit posts to server action; no onSubmit handler here.
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button className="px-3 py-2 rounded bg-white/10 hover:bg-white/15 border">Add Vehicle</Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[560px] max-w-[100vw] backdrop-blur border shadow-[0_0_0_1px_hsl(var(--border)),0_0_24px_rgba(0,238,255,0.15)]">
+      <SheetContent
+        side="right"
+        className="w-[560px] max-w-[100vw] backdrop-blur border shadow-[0_0_0_1px_hsl(var(--border)),0_0_24px_rgba(0,238,255,0.15)]"
+      >
         <SheetHeader>
           <SheetTitle>Add Vehicle</SheetTitle>
+          <SheetDescription className="sr-only">Vehicle add/edit form</SheetDescription>
         </SheetHeader>
 
         <form action={createVehicle} className="mt-6 space-y-5">
@@ -98,7 +119,12 @@ export default function VehicleDrawer() {
           <div className="flex gap-2">
             <div className="flex-1">
               <label className="block text-xs opacity-70 mb-1">Registration (VRN)</label>
-              <input {...register("registration")} name="registration" className="w-full rounded bg-transparent border px-3 py-2" required />
+              <input
+                {...register("registration")}
+                name="registration"
+                className="w-full rounded bg-transparent border px-3 py-2"
+                required
+              />
             </div>
             <Button type="button" onClick={doLookup} disabled={loading} className="self-end">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
@@ -123,16 +149,32 @@ export default function VehicleDrawer() {
             </div>
             <div>
               <label className="block text-xs opacity-70 mb-1">Mileage</label>
-              <input {...register("mileage")} name="mileage" type="number" className="w-full rounded bg-transparent border px-3 py-2" />
+              <input
+                {...register("mileage")}
+                name="mileage"
+                type="number"
+                className="w-full rounded bg-transparent border px-3 py-2"
+              />
             </div>
 
             <div>
               <label className="block text-xs opacity-70 mb-1">Price (GBP)</label>
-              <input {...register("price")} name="price" type="number" step="1" className="w-full rounded bg-transparent border px-3 py-2" />
+              <input
+                {...register("price")}
+                name="price"
+                type="number"
+                step="1"
+                className="w-full rounded bg-transparent border px-3 py-2"
+              />
             </div>
             <div>
               <label className="block text-xs opacity-70 mb-1">Engine Capacity (cc)</label>
-              <input {...register("engine_capacity")} name="engine_capacity" type="number" className="w-full rounded bg-transparent border px-3 py-2" />
+              <input
+                {...register("engine_capacity")}
+                name="engine_capacity"
+                type="number"
+                className="w-full rounded bg-transparent border px-3 py-2"
+              />
             </div>
 
             <div>
@@ -141,7 +183,12 @@ export default function VehicleDrawer() {
             </div>
             <div>
               <label className="block text-xs opacity-70 mb-1">CO₂ (g/km)</label>
-              <input {...register("co2_emissions")} name="co2_emissions" type="number" className="w-full rounded bg-transparent border px-3 py-2" />
+              <input
+                {...register("co2_emissions")}
+                name="co2_emissions"
+                type="number"
+                className="w-full rounded bg-transparent border px-3 py-2"
+              />
             </div>
 
             <div>
@@ -150,7 +197,11 @@ export default function VehicleDrawer() {
             </div>
             <div>
               <label className="block text-xs opacity-70 mb-1">Transmission</label>
-              <input {...register("transmission")} name="transmission" className="w-full rounded bg-transparent border px-3 py-2" />
+              <input
+                {...register("transmission")}
+                name="transmission"
+                className="w-full rounded bg-transparent border px-3 py-2"
+              />
             </div>
 
             <div className="col-span-2">
@@ -166,7 +217,9 @@ export default function VehicleDrawer() {
 
           <div className="flex gap-3">
             <Button className="px-4 py-2 border">Create</Button>
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
           </div>
         </form>
       </SheetContent>

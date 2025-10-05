@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { logout } from "@/app/(admin)/admin/actions";
+import { logout } from "../../../app/(admin)/actions";
 import CarIcon from "@/components/branding/CarIcon";
 import { LogOut } from "lucide-react";
 
